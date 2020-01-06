@@ -1,5 +1,5 @@
 ---
-title: "[Parte 01] O que é Apredizado (de Máquina) & PLA"
+title: "[Parte 01] O que é Aprendizado (de Máquina) & PLA"
 categories: [Machine Learning - Learning from Data]
 ---
 
