@@ -1,7 +1,6 @@
 ---
 title: "[Parte 01] O que é Apredizado (de Máquina) & PLA"
-categories: [Aprendizado de Máquina - Learning from Data]
-tags: [aprendizagem-de-maquina]
+categories: [Machine Learning - Learning from Data]
 ---
 
 
@@ -72,4 +71,4 @@ Na primeira parte dessa série de textos, vimos o *framework* básico com o qual
 
 Qualquer dúvida, sugestão ou *feedback*, por favor, deixe um comentário abaixo.
 
-> Essa postagem faz parte de uma [série]({{ site.baseurl }}/categories/aprendizado-de-máquina-learning-from-data/) de textos que tem o objetivo de estudar, principalmente, o curso "[Learning from Data](http://www.work.caltech.edu/telecourse.html)", ministrado pelo Professor Yaser Abu-Mostafa. Outros materiais utilizados serão sempre referenciados.
+> Essa postagem faz parte de uma [série]({{ site.baseurl }}/categorias/#machine-learning-learning-from-data) de textos que tem o objetivo de estudar, principalmente, o curso "[Learning from Data](http://www.work.caltech.edu/telecourse.html)", ministrado pelo Professor Yaser Abu-Mostafa. Outros materiais utilizados serão sempre referenciados.

@@ -264,22 +264,22 @@ whitelist:
 #   permalinks:
 #     category: /categories/:name/
 #     tag: /tags/:name/
-category_archive:
-  type: jekyll-archives
-  path: /categories/
-tag_archive:
-  type: jekyll-archives
-  path: /tags/
-jekyll-archives:
-  enabled:
-    - categories
-    - tags
-  layouts:
-    category: archive-taxonomy
-    tag: archive-taxonomy
-  permalinks:
-    category: /categories/:name/
-    tag: /tags/:name/
+#category_archive:              ### START
+#  type: jekyll-archives
+#  path: /categories/
+#tag_archive:
+#  type: jekyll-archives
+#  path: /tags/
+#jekyll-archives:
+#  enabled:
+#    - categories
+#    - tags
+#  layouts:
+#    category: archive-taxonomy
+#    tag: archive-taxonomy
+#  permalinks:
+#    category: /categories/:name/
+#    tag: /tags/:name/         ### END
 
 
 # HTML Compression
