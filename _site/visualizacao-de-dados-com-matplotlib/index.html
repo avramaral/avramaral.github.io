@@ -1,0 +1,704 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.17.2 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="pt" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>Visualização de Dados com Matplotlib - Blog do André</title>
+<meta name="description" content="Uma parte essencial do processo de análise de dados é a visualização parcial e final dos resultados que foram alcançados. Na maior parte das vezes, é muito mais fácil interpretar esse tipo de informação graficamente do que através de, apenas, tabelas ou números.">
+
+
+  <meta name="author" content="André V. R. Amaral">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Blog do André">
+<meta property="og:title" content="Visualização de Dados com Matplotlib">
+<meta property="og:url" content="http://localhost:4000/visualizacao-de-dados-com-matplotlib/">
+
+
+  <meta property="og:description" content="Uma parte essencial do processo de análise de dados é a visualização parcial e final dos resultados que foram alcançados. Na maior parte das vezes, é muito mais fácil interpretar esse tipo de informação graficamente do que através de, apenas, tabelas ou números.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2019-12-17T00:00:00-03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/visualizacao-de-dados-com-matplotlib/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "André",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Blog do André Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<link rel="shortcut icon" href="../../assets/images/favicon.ico" type="image/x-icon">
+
+<!-- end custom head snippets -->
+
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+          processEscapes: true
+        }
+      });
+    </script>
+    
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          Blog do André
+          <span class="site-subtitle">Probabilidade, estatística e mais.</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/categorias/" >Categorias</a>
+            </li><li class="masthead__menu-item">
+              <a href="/busca/" >Busca</a>
+            </li></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+
+      
+        <img src="/assets/images/profile_picture.jpeg" alt="André V. R. Amaral" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">André V. R. Amaral</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Mestrando em Estatística pela <a href="http://www.est.ufmg.br/portal/">Universidade Federal de Minas Gerais</a>.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Informações</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+            <li><a href="/sobre/" rel="nofollow noopener noreferrer"><i class="far fa-fw fa-question-circle" aria-hidden="true"></i> Sobre</a></li>
+          
+        
+          
+            <li><a href="mailto:avramaral@gmail.com" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i> E-mail</a></li>
+          
+        
+          
+            <li><a href="https://github.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+          
+        
+          
+            <li><a href="https://twitter.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i> Twitter</a></li>
+          
+        
+          
+            <li><a href="https://www.linkedin.com/in/andre-victor-ribeiro-amaral/" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin-in" aria-hidden="true"></i> LinkedIn</a></li>
+          
+        
+          
+            <li><a href="https://www.youtube.com/channel/UC5RVscKF68DWYixtJPrBccQ" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-youtube" aria-hidden="true"></i> YouTube</a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="Visualização de Dados com Matplotlib">
+    <meta itemprop="description" content="Uma parte essencial do processo de análise de dados é a visualização parcial e final dos resultados que foram alcançados. Na maior parte das vezes, é muito mais fácil interpretar esse tipo de informação graficamente do que através de, apenas, tabelas ou números.">
+    <meta itemprop="datePublished" content="December 17, 2019">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">Visualização de Dados com Matplotlib
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  12 minuto(s) de leitura
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Uma parte essencial do processo de análise de dados é a visualização parcial e final dos resultados que foram alcançados. Na maior parte das vezes, é muito mais fácil interpretar esse tipo de informação graficamente do que através de, apenas, tabelas ou números.</p>
+
+<p>Entretanto, mais do que apenas ser capaz de plotar gráficos, é importante que o pesquisador (ou estudante, ou cientista de dados, etc.) represente esse conjunto de dados de uma forma que sua audiência consiga entender. Você precisa ter gráficos acessíveis, confiáveis e elegantes (<a href="https://www.amazon.com/Data-Visualisation-Handbook-Driven-Design/dp/1473912148">Kirk, A</a>. citado em <a href="https://www.edx.org/course/python-data-science-uc-san-diegox-dse200x">Curso edX</a>).</p>
+
+<p>Em Python, o pacote mais básico para visualização de dados é o <strong>Matplotlib</strong>. Ele nos permite plotar diferentes tipos de gráficos com dezenas de opções de customização. Por esse motivo, nós o escolhemos para esse tutorial.</p>
+
+<p><img src="/assets/images/visualizacao-de-dados-com-matplotlib_files/matplotlib-principal.png" alt="Tela principal" /></p>
+
+<p>Toda a imagem mostrada acima é uma <code class="highlighter-rouge">Figure</code> criada pelo módulo <code class="highlighter-rouge">matplotlib.pyplot</code>; dentro dela, na área branca, estão compreendidos os eixos <code class="highlighter-rouge">x</code> e <code class="highlighter-rouge">y</code>, chamadas de <code class="highlighter-rouge">Axes</code> ou <code class="highlighter-rouge">Subplot</code> (existe uma pequena diferença entre esses dois termos, mas para a maioria dos casos, eles podem ser tratados como sinônimos). Além disso, no canto superior esquerdo, existe um pequeno menu que nos permite realizar algumas ações $-$ incluindo exportar o gráfico como imagem.</p>
+
+<p><strong>Observação:</strong> A partir desse ponto, eu não vou mais apresentar toda a janela mostrada na figura acima; ao invés disso, apenas os gráficos serão gerados.</p>
+
+<p>Agora que sabemos o básico, vamos importar a biblioteca e verificar se ela está funcionando.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+</code></pre></div></div>
+
+<p>Perceba que, na maior parte das situações, nós só temos que importar o módulo <code class="highlighter-rouge">pyplot</code>. Assim, se nenhuma mensagem de erro apareceu, o Matplotlib foi corretamente importado.</p>
+
+<p><strong>Observação 2:</strong> se você está utilizando o Jupyter Notebook para realizar seus testes, é necessário que o comando <code class="highlighter-rouge">%matplotlib inline</code> seja incluído antes de importar a biblioteca.</p>
+
+<p>Como você deve imaginar, a primeira coisa que temos que fazer é criar uma <code class="highlighter-rouge">Figure</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>&lt;Figure size 216x432 with 0 Axes&gt;
+</code></pre></div></div>
+
+<p>Além de criar um objeto <code class="highlighter-rouge">Figure</code> e atribuí-lo à variável <code class="highlighter-rouge">fig</code>, nós defimos os valores para o parâmetro <code class="highlighter-rouge">figsize</code>, que, como o nome sugere, determina o tamanho da janela: $3 \times 6$ polegadas.</p>
+
+<p>Agora nós criamos, dentro do “container” <code class="highlighter-rouge">fig</code>, um objeto <code class="highlighter-rouge">Axes</code>. Para isso, basta utilizar o método <code class="highlighter-rouge">add_subplot()</code>:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Note que, mais uma vez, nós tivemos que passar o valor de um parâmetro para a função. Nesse caso, o <code class="highlighter-rouge">111</code> representa o número de objetos <code class="highlighter-rouge">Axes</code> que serão criados dentro de <code class="highlighter-rouge">fig</code>: uma array com <code class="highlighter-rouge">1</code> linha, <code class="highlighter-rouge">1</code> coluna e índice <code class="highlighter-rouge">1</code>.</p>
+
+<p>O próximo passo é definir os dados que serão utilizados para plotar o gráfico. Para esse primeiro exemplo, eu vou criar duas listas que ilustram o comportamento da função $f(x) = 2x$ com domínio em $\lbrace 0, 1, \cdots, 10 \rbrace$:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">18</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
+</code></pre></div></div>
+
+<p>Feito isso, agora só precisamos plotar esses valores em um sistema de coordenadas utilizando o comando <code class="highlighter-rouge">plot()</code>; e, por fim, chamar o método <code class="highlighter-rouge">show()</code> para mostrá-lo na tela:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># all the code togheter
+</span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/assets/images/visualizacao-de-dados-com-matplotlib_files/visualizacao-de-dados-com-matplotlib_19_0.png" alt="png" /></p>
+
+<p><strong>Observação 3</strong>: mais uma vez, se você está utilizando Jupyter Notebook, talvez seja necessário que todos os comandos estejam em uma única célula.</p>
+
+<p>Em adição ao que acabamos de fazer, é possível modificar algumas característica do gráfico, veja a seguir:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># all the code togheter
+</span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span> <span class="c1"># intentionally smaller than the previous one
+</span><span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s">'f(x)'</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s">'red'</span><span class="p">)</span>
+
+<span class="c1"># ax1 properties
+</span><span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">'My Title'</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s">'X'</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">'Y'</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span> <span class="o">=</span> <span class="mi">4</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/assets/images/visualizacao-de-dados-com-matplotlib_files/visualizacao-de-dados-com-matplotlib_22_0.png" alt="png" /></p>
+
+<p>Nós incluímos informações importantes com essas últimas linhas de código. No método <code class="highlighter-rouge">scatter()</code>, nós adicionamos dois parâmetros: <code class="highlighter-rouge">label</code>e <code class="highlighter-rouge">color</code>. O primeiro deles é usado para identificar a curva que está sendo plotada (através do método <code class="highlighter-rouge">legend()</code>), enquanto que o segundo define a cor dos pontos.</p>
+
+<p>Além disso, definimos algumas novas propriedades para o objeto <code class="highlighter-rouge">ax1</code>: o método <code class="highlighter-rouge">set_title()</code> define o título do gráfico, e os métodos <code class="highlighter-rouge">set_xlabel</code> e <code class="highlighter-rouge">set_ylabel</code> definem os rótulos que serão utilizados nos eixos $x$ e $y$, respectivamente.</p>
+
+<p>A biblioteca Matplotlib, como mencionado no começo desse texto, é muito flexível; por isso, a fim de extrair todo o seu potencial, é importante que você leia a <a href="https://matplotlib.org/contents.html">documentação oficial</a>.</p>
+
+<p>Finalmente, um outro exemplo, um pouco mais complexo, será apresentado. Primeiro, veja o seguinte código:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+
+<span class="c1"># create a new figure
+</span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">5</span><span class="p">))</span>
+
+<span class="c1"># create two new Axes objects in the format of a '1 row x 2 columns' array
+</span><span class="n">ax1</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">121</span><span class="p">)</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">122</span><span class="p">)</span>
+
+<span class="c1"># create the data set that will be plotted
+</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c1"># y = f(x) = sin(x)
+</span><span class="n">z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c1"># z = g(x) = cos(x)
+</span>
+<span class="c1"># plot f(x) and g(x)
+</span><span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s">'sin'</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s">'b'</span><span class="p">)</span> <span class="c1"># 'b' stands for 'blue'
+</span><span class="n">ax2</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s">'cos'</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s">'r'</span><span class="p">)</span> <span class="c1"># 'r' stands for 'red'
+</span>
+<span class="c1"># set 'ax1' properties
+</span><span class="n">ax1</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">'Trigonometric Functions - SINE'</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s">'Angle (in radian)'</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">'Magnitude'</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.25</span><span class="p">,</span> <span class="mf">1.25</span><span class="p">])</span> <span class="c1"># define the range of both axes
+# define ticks for each axis (3 auxiliary variables)
+</span><span class="n">xticks</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span><span class="p">]</span>                         <span class="c1"># define the ticks values - 'X' axis
+</span><span class="n">xlabel</span> <span class="o">=</span> <span class="p">[</span><span class="s">'0'</span><span class="p">,</span> <span class="s">'$</span><span class="se">\\</span><span class="s">frac{</span><span class="se">\\</span><span class="s">pi}{2}$'</span><span class="p">,</span> <span class="s">'$</span><span class="se">\\</span><span class="s">pi$'</span><span class="p">,</span> <span class="s">'$</span><span class="se">\\</span><span class="s">frac{3</span><span class="se">\\</span><span class="s">pi}{2}$'</span><span class="p">,</span> <span class="s">'$2</span><span class="se">\\</span><span class="s">pi$'</span><span class="p">]</span> <span class="c1"># define the label values - 'X' axis
+</span><span class="n">yticks</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>                                                 <span class="c1"># define the ticks values - 'Y' axis
+</span><span class="n">ax1</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="nb">set</span><span class="p">(</span><span class="n">ticks</span> <span class="o">=</span> <span class="n">xticks</span><span class="p">,</span> <span class="n">ticklabels</span> <span class="o">=</span> <span class="n">xlabel</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="nb">set</span><span class="p">(</span><span class="n">ticks</span> <span class="o">=</span> <span class="n">yticks</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="c1"># set 'ax1' properties
+</span><span class="n">ax2</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s">'Trigonometric Functions - COSINE'</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s">'Angle (in radian)'</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s">'Magnitude'</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.25</span><span class="p">,</span> <span class="mf">1.25</span><span class="p">])</span> <span class="c1"># define the range of both axes
+# define ticks for each axis (3 auxiliary variables)
+</span><span class="n">xticks</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mf">1.5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">*</span> <span class="mi">2</span><span class="p">]</span>                         <span class="c1"># define the ticks values - 'X' axis
+</span><span class="n">xlabel</span> <span class="o">=</span> <span class="p">[</span><span class="s">'0'</span><span class="p">,</span> <span class="s">'$</span><span class="se">\\</span><span class="s">frac{</span><span class="se">\\</span><span class="s">pi}{2}$'</span><span class="p">,</span> <span class="s">'$</span><span class="se">\\</span><span class="s">pi$'</span><span class="p">,</span> <span class="s">'$</span><span class="se">\\</span><span class="s">frac{3</span><span class="se">\\</span><span class="s">pi}{2}$'</span><span class="p">,</span> <span class="s">'$2</span><span class="se">\\</span><span class="s">pi$'</span><span class="p">]</span> <span class="c1"># define the label values - 'X' axis
+</span><span class="n">yticks</span> <span class="o">=</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>                                                 <span class="c1"># define the ticks values - 'Y' axis
+</span><span class="n">ax2</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="nb">set</span><span class="p">(</span><span class="n">ticks</span> <span class="o">=</span> <span class="n">xticks</span><span class="p">,</span> <span class="n">ticklabels</span> <span class="o">=</span> <span class="n">xlabel</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="nb">set</span><span class="p">(</span><span class="n">ticks</span> <span class="o">=</span> <span class="n">yticks</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span> <span class="c1"># fix the spaces between the two Axes
+</span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/assets/images/visualizacao-de-dados-com-matplotlib_files/visualizacao-de-dados-com-matplotlib_27_0.png" alt="png" /></p>
+
+<p>Nós acabamos de criar uma <code class="highlighter-rouge">Figure</code> com dois <code class="highlighter-rouge">Subplot</code>’s dentro dela. As imagens da esquerda e da direita são definidas pelas funções seno e cosseno, respectivametne. Além disso, há algumas coisas novas aqui; por isso, os próximos parágrafos serão dedicados a esses detalhes.</p>
+
+<p>Depois de importar, além do Matplotlib, o Numpy (veja <a href="/introducao-numpy-pandas/">aqui</a> um pequeno tutorial sobre Numpy e Pandas), nós criamos uma <code class="highlighter-rouge">Figure</code> com um tamanho específico. Agora, utilizando esse objeto, que foi armazenado na variável <code class="highlighter-rouge">fig</code>, foram criados dois <code class="highlighter-rouge">Subplot</code>’s $-$ <strong>Importante:</strong> note que para o primeiro objeto, o valor do parâmetro foi <code class="highlighter-rouge">121</code>(que significa <code class="highlighter-rouge">1</code> linha, <code class="highlighter-rouge">2</code> colunas e o índice <code class="highlighter-rouge">1</code>), enquanto que para o segundo, esse número teve que ser definido como <code class="highlighter-rouge">122</code>.</p>
+
+<p>Nas linhas seguintes, a única coisa que fizemos foi criar os nossos vetores de dados <code class="highlighter-rouge">x</code>, <code class="highlighter-rouge">y</code> e <code class="highlighter-rouge">z</code>. Com o Numpy, nós geramos uma lista, atribuída a <code class="highlighter-rouge">x</code>, de valores igualmente espaçados entre $0$ e $2\pi$; então, nas variáveis <code class="highlighter-rouge">y</code> e <code class="highlighter-rouge">z</code>, nós calculamos e salvamos os valores de seno e cosseno de <code class="highlighter-rouge">x</code>, respectivamente.</p>
+
+<p>Depois disso tudo, diferentemente do primeiro exemplo, utilizamos o método <code class="highlighter-rouge">plot()</code> (ao invés de <code class="highlighter-rouge">scatter()</code>). Essa modificação faz com que o gráfico de pontos seja, agora, exibido como gráfico de linha.</p>
+
+<p>Por fim, sobre as propriedades de <code class="highlighter-rouge">ax1</code> e <code class="highlighter-rouge">ax2</code>, descreverei apenas os atributos e métodos que ainda não foram discutidos. A primeira novidade é o método <code class="highlighter-rouge">axis()</code>, que define os valores mínimo e máximo que serão mostrados em cada eixo do gráfico $-$ perceba que é necessário passar uma <strong>lista</strong> de números. Além disso, nós também criamos algumas variáveis que foram utilizadas para definir os parametros <code class="highlighter-rouge">ticks</code> e <code class="highlighter-rouge">ticklabes</code> dos métodos <code class="highlighter-rouge">xaxis.set()</code> e <code class="highlighter-rouge">yaxis.set()</code>. Esses métodos definem em quais pontos ao longo dos eixos você terá um indicador de valor.</p>
+
+<p>Um pequeno detalhe é o de que foi necessário, antes de chamar o método <code class="highlighter-rouge">show()</code>, utilizar a função <code class="highlighter-rouge">tight_layout()</code> a fim de ajustar o tamanho e espaçamento dos gráficos.</p>
+
+<h2 id="conclusão">Conclusão</h2>
+
+<p><strong>Matplotlib</strong> é uma biblioteca muito flexível e poderosa que nos permite criar diferentes tipos de gráficos. Além disso, como mencionado anteriormente, existe uma galeria oficial cheia de exemplos reais criados a partir dessa ferramenta $-$ confira, e veja todas as possibilidades.</p>
+
+<p>Qualquer dúvida, sugestão ou <em>feedback</em>, por favor, deixe um comentário abaixo.</p>
+
+<blockquote>
+  <p>Eu havia escrito esse texto, originalmente em inglês, em uma antiga versão do blog que já não existe mais. Pequenas correções e atualizações, além da própria tradução, foram feitas para que o conteúdo continuasse relevante.</p>
+</blockquote>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-tags" aria-hidden="true"></i> Tags: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/tags/ciencia-de-dados" class="page__taxonomy-item" rel="tag">ciencia-de-dados</a><span class="sep">, </span>
+    
+      
+      
+      <a href="/tags/python" class="page__taxonomy-item" rel="tag">python</a>
+    
+    </span>
+  </p>
+
+
+
+
+  
+
+
+  
+  
+  
+
+  <p class="page__taxonomy">
+    <strong><i class="fas fa-fw fa-folder-open" aria-hidden="true"></i> Categorias: </strong>
+    <span itemprop="keywords">
+    
+      
+      
+      <a href="/categories/tutorial" class="page__taxonomy-item" rel="tag">Tutorial</a>
+    
+    </span>
+  </p>
+
+
+        
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Atualizado em:</strong> <time datetime="2019-12-17T00:00:00-03:00">December 17, 2019</time></p>
+        
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/introducao-numpy-pandas/" class="pagination--pager" title="Uma Introdução ao NumPy e Pandas para Análise de Dados
+">Anterior</a>
+    
+    
+      <a href="/o-que-e-aprendizado/" class="pagination--pager" title="[Parte 01] O que é Apredizado (de Máquina) &amp; PLA
+">Próxima</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Deixe um comentário</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">Talvez você também goste</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/o-que-e-aprendizado/" rel="permalink">[Parte 01] O que é Apredizado (de Máquina) &amp; PLA
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  11 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Quando se fala de Aprendizado de Máquina, há pelo menos duas interpretações para o que isso significa: a primeira delas diz respeito a um conjunto de técnicas e modelos estatísticos que são usados, primariamente, para se fazer inferência (estimação pontual dos parâmetros de interesse, contrução de intervalo de confi...</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/introducao-numpy-pandas/" rel="permalink">Uma Introdução ao NumPy e Pandas para Análise de Dados
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  17 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Python oferece muitas bibliotecas que extendem suas funcionalidades padrão. Por esse motivo, quando vamos trabalhar com processamento de dados, existem dois pacotes muito úteis que podemos utilizar: Numpy e Pandas.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Informações:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://github.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/andre-victor-ribeiro-amaral/" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin-in" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+        
+          <li><a href="https://www.youtube.com/channel/UC5RVscKF68DWYixtJPrBccQ" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-youtube" aria-hidden="true"></i> YouTube</a></li>
+        
+      
+    
+
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2020 André. Desenvolvido com <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "http://localhost:4000/visualizacao-de-dados-com-matplotlib/";  // Replace PAGE_URL with your page's canonical URL variable
+      this.page.identifier = "/visualizacao-de-dados-com-matplotlib"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-do-andre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+  </body>
+</html>

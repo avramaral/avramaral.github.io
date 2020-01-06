@@ -1,0 +1,904 @@
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-01-06T19:11:03-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Blog do André</title><subtitle>Site pessoal.</subtitle><author><name>André V. R. Amaral</name></author><entry><title type="html">[Parte 01] O que é Apredizado (de Máquina) &amp;amp; PLA</title><link href="http://localhost:4000/o-que-e-aprendizado/" rel="alternate" type="text/html" title="[Parte 01] O que é Apredizado (de Máquina) &amp; PLA" /><published>2020-01-06T00:00:00-03:00</published><updated>2020-01-06T00:00:00-03:00</updated><id>http://localhost:4000/o-que-e-aprendizado</id><content type="html" xml:base="http://localhost:4000/o-que-e-aprendizado/">&lt;p&gt;Quando se fala de &lt;strong&gt;Aprendizado de Máquina&lt;/strong&gt;, há pelo menos duas interpretações para o que isso significa: a primeira delas diz respeito a um conjunto de técnicas e modelos estatísticos que são usados, primariamente, para se fazer inferência (estimação pontual dos parâmetros de interesse, contrução de intervalo de confiança, teste de hipótese, etc.); enquanto que a segunda abordagem, que será a utilizada daqui para frente, se preocupa em, principalmente, fazer predição sobre novas observações $-$ nesse caso, o(s) modelo(s) utilizado(s) pode(m), inclusive, não ter forma explícita (Izbicki, R.; dos Santos, T. M. &lt;a href=&quot;http://www.work.caltech.edu/telecourse.html&quot;&gt;Machine Learning sob a ótica estatística&lt;/a&gt;). Dito isso, podemos começar.&lt;/p&gt;
+
+&lt;h2 id=&quot;componentes-do-aprendizado&quot;&gt;Componentes do aprendizado&lt;/h2&gt;
+
+&lt;p&gt;A fim de dar contexto ao que vem a seguir, tome o seguinte exemplo: imagine que um banco contratou uma empresa de consultoria para ajudá-lo a determinar se, para cada cliente que pede um empréstimo, o banco deve ou não conceder esse crédito (aqui, um cliente é bom se, de alguma forma, faz com que o banco ganhe dinheiro; e é ruim, caso contrário). Para construir um modelo que resolve esse tipo de problema, o banco tem um conjunto de dados de clientes antigos, com várias de suas características (salário, estado civil, bens materiais, etc.), além de, se no passado, esses clientes fizeram a instituição ganhar ou perder dinheiro. De posse dessas informações, a empresa de consultoria pode escrever um modelo que ajuda o banco a predizer se clientes futuros darão (ou não) algum tipo de lucro.&lt;/p&gt;
+
+&lt;p&gt;Considerando esse exemplo, podemos dar nomes às componentes (do apredizado) de interesse. Seja $\mathbf{x}$ o vetor de entrada (informação que o banco tem de um cliente), então $f: \mathcal{X} \longrightarrow \mathcal{Y}$ é a função alvo (que é desconhecida) $-$ onde $\mathcal{X}$ é o espaço de entrada (para o caso onde existem $d$ características sobre um cliente, $\mathcal{X}$ é o Espaço Euclidiano $d$-dimensional) e $\mathcal{Y}$ é o espaço de saída (no exemplo, $\mathcal{Y} = \lbrace +1, -1 \rbrace$; ou seja, o banco concede ou não o empréstimo). Além disso, temos o conjunto de dados com entradas e saídas, definido por $\mathcal{D} = (\mathbf{x}_1, y_1), \cdots, (\mathbf{x}_N, y_N)$ $-$ onde $y_n = f(\mathbf{x}_n)$, tal que $n = 1, \cdots, N$ $-$, e um algoritmo de aprendizagem $\mathcal{A}$ que usa $\mathcal{D}$ para determinar uma função $g: \mathcal{X} \longrightarrow \mathcal{Y}$ que aproxima $f$. Nesse caso, o algoritmo “escolhe” uma função $g$ a partir de uma classe de funções que são relevantes para o problema (esse conjunto que contempla $g$ será denotado por $\mathcal{H}$, e receberá o nome de &lt;em&gt;Hypothesis Set&lt;/em&gt;).&lt;/p&gt;
+
+&lt;p&gt;Voltando ao exemplo, o banco irá, baseado em $g$, decidir para quais clientes realizará o empréstimo (lembre-se que $f$ é desconhecida). Nesse caso, o algoritmo $\mathcal{A}$ selecionou $g \in \mathcal{H}$ a partir da análise do conjunto de dados $\mathcal{D}$; na esperança que o comportamento de clientes futuros ainda possa ser modelado por essa função escolhida. A figura a seguir ilustra a relação entre todas essas componentes.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/o-que-e-aprendizado/img-componentes-aprendizado.png&quot; alt=&quot;Learning from Data&quot; /&gt;
+&lt;em&gt;Figura 1 [fonte: “&lt;a href=&quot;http://www.work.caltech.edu/textbook.html&quot;&gt;Learning from Data&lt;/a&gt;”] $-$ Componentes do aprendizado.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;A Fig. 1 será utilizada como &lt;em&gt;framework&lt;/em&gt; para tratarmos o “problema do aprendizado”. Mais tarde, esse esquema vai passar por alguns refinamentos, mas a base será a mesma:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;
+    &lt;p&gt;Existe uma $f$ para ser aprendida (que é, e continuará sendo desconhecida para nós).&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Temos um conjunto de dados $\mathcal{D}$ gerados por essa função alvo.&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;O algoritmo de aprendizagem $\mathcal{A}$ utiliza $\mathcal{D}$ para encontrar uma função $g \in \mathcal{H}$ que aproxima bem $f$.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;h2 id=&quot;um-modelo-de-aprendizado-simples&quot;&gt;Um modelo de aprendizado simples&lt;/h2&gt;
+
+&lt;p&gt;Sobre as componentes do aprendizado que acabamos de discutir, a função alvo $f$ e o conjunto de dados $\mathcal{D}$ vêm do problema com o qual estamos lidando. Entretanto, o conjunto de possíveis soluções $\mathcal{H}$ e o algoritmo de aprendizagem $\mathcal{A}$ são ferramentas nós temos que escolher para determinar $g$; nesse sentido, eles ($\mathcal{H}$ e $\mathcal{A}$) são chamados de &lt;em&gt;modelo de aprendizado&lt;/em&gt;.&lt;/p&gt;
+
+&lt;p&gt;Vejamos, então, um modelo de aprendizado simples: seja $\mathcal{X} = \mathbb{R}^d$ e $\mathcal{Y} = \lbrace +1, -1 \rbrace$; onde $+1$ e $-1$, denotam “sim” e “não”, respectivamente. No exemplo do banco, diferentes coordenadas de $\mathbf{x} \in \mathcal{X}$ representam cada uma das características do cliente (salário, estado civil, bens materiais, etc.); enquanto que o espaço de saída $\mathcal{Y}$ faz referência ao fato de o banco conceder ou não o empréstimo. Em adição, vamos dizer que $\mathcal{H}$ é composto por todas as funções $h \in \mathcal{H}$ que têm forma ditada por:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;% &lt;![CDATA[
+\begin{align}
+h(\mathbf{x}) &amp; = \text{sign}\left(\left(\sum_{i = 1}^{d} w_i x_i\right) - \text{threshold}\right) \\
+              &amp; = \text{sign}\left(\left(\sum_{i = 1}^{d} w_i x_i\right) + w_0\right), \text{ onde } w_0 = (-1) \cdot\text{threshold} \\
+              &amp; = \text{sign}\left(\sum_{i = 0}^{d} w_i x_i \right), \text{ com } x_0 = 1 \text{ fixo} \\
+              &amp; = \text{sign}\left(\mathbf{w}^{\text{T}} \mathbf{x} \right),
+\end{align} %]]&gt;&lt;/script&gt;
+
+&lt;p&gt;onde $\mathbf{w}$ é um vetor de “pesos” e $\mathbf{x} \in \mathcal{X}$, com $\mathcal{X} = \lbrace 1 \rbrace \times \mathbb{R}^d$. O que está sendo feito aqui é simples: a família de funções $h(\cdot)$ $-$ perceba que $h$ não está completamente definida, já $\textbf{w}$ não é parâmetro da função $-$, atribui pesos $w_i$ para cada uma das $d$ características dos indivíduos. Dessa forma, podemos determinar a regra de que, se $\sum_{i = 1}^{d} w_i x_i &amp;gt; \text{threshold}$, então o banco aprova o empréstimo; caso contrário, não. $h(\mathbf{x})$ traduz essa ideia; além de assumir os valores $+1$ ou $-1$, como gostaríamos que fosse.&lt;/p&gt;
+
+&lt;p&gt;O modelo que acabamos de descrever é chamado de &lt;em&gt;perceptron&lt;/em&gt;. O algoritmo de aprendizagem $\mathcal{A}$ vai procurar por valores de $\mathbf{w}$ ($w_0$ incluído) que se adaptam bem as dados. A escolha ótima será a nossa função $g$.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Observação:&lt;/strong&gt; se o conjunto de dados for linearmente separável, então existirá um $\mathbf{w}$ que classifica todas as observações corretamente.&lt;/p&gt;
+
+&lt;p&gt;Por fim, vamos ver então qual é esse algoritmo $\mathcal{A}$. O algoritmo de aprendizagem nesse caso é chamado de &lt;em&gt;perceptron learning algorithm&lt;/em&gt; (PLA), e funciona como descrito abaixo.&lt;/p&gt;
+
+&lt;p&gt;Para encontrar $\mathbf{w}$ tal que todos os pontos estão corretamente classificados, vamos considerar um processo de iteração em $t$ $-$ tal que $t = 0, 1, 2, \cdots$. Nesse caso, o vetor de “pesos” no $t$-ésimo instante será denotado por $\mathbf{w}(t)$; aqui, $\mathbf{w}(0)$ é escolhido arbitrariamente. Para cada etapa do processo, o algoritmo seleciona uma das obervações que &lt;strong&gt;não&lt;/strong&gt; está classificada corretamente $-$ vamos chamá-la de $(\mathbf{x}(t), y(t))$ $-$, e aplica a seguinte regra:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\begin{align}
+\mathbf{w}(t+1) = \mathbf{w}(t) + y(t) \, \mathbf{x}(t).
+\end{align}&lt;/script&gt;
+
+&lt;p&gt;O que a regra que acabamos de definir faz é “mover” a reta $w_0 + w_1 x_1 + w_2 x_2 = 0$ (para o caso com $2$ dimensões) que divide os pontos do conjunto de dados; a fim de classificar corretamente a observação $(\mathbf{x}(t), y(t))$.&lt;/p&gt;
+
+&lt;p&gt;Como dito anteriormente, se os dados são linearmente separáveis, o PLA converge, classificando corretamente todas as observações; o que implica em duas coisas interessantes:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;
+    &lt;p&gt;Repare que, para cada etapa do processo de iteração, apesar de corrigir a observação que está sendo considerada, o algoritmo pode “bagunçar” a classificação (em um primeiro momento, correta) dos outros pontos; mas mesmo assim, sob a hipótese de que os dados são linearmente separáveis, o algoritmo converge (a demonstração pode ser vista &lt;a href=&quot;http://www.cs.columbia.edu/~mcollins/courses/6998-2012/notes/perc.converge.pdf&quot;&gt;aqui&lt;/a&gt;).&lt;/p&gt;
+  &lt;/li&gt;
+  &lt;li&gt;
+    &lt;p&gt;Para esse tipo de classificador que acabamos de detalhar, $\mathcal{H}$ é uma classe infinita de funções; assim, dizer que, nesse caso, o algorimo converge, é o mesmo que dizer que, mesmo em um conjunto de cardinalidade infinita, foi necessário uma quantidade finita de iterações para encontrarmos uma solução ótima (no sentido de classificar corretamente todos os pontos) para o problema $-$ o que é, no mínimo, interessante.&lt;/p&gt;
+  &lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h2 id=&quot;conclusão&quot;&gt;Conclusão&lt;/h2&gt;
+
+&lt;p&gt;Na primeira parte dessa série de textos, vimos o &lt;em&gt;framework&lt;/em&gt; básico com o qual vamos trabalhar quando queremos modelar o processo de aprendizado (de máquina). Essas ideias serão revisitadas à exaustão e, por isso, são tão importantes. Por fim, vimos também como essas componentes do apredizado podem nos guiar na construção de um modelo de classificação simples. Tal modelo, o “perceptron”, é de fato limitado; mas é um excelente primeiro passo que podemos dar. A próxima postagem será dedicada à implementação desse classificador em Python, bem como à discussão de um exemplo.&lt;/p&gt;
+
+&lt;p&gt;Qualquer dúvida, sugestão ou &lt;em&gt;feedback&lt;/em&gt;, por favor, deixe um comentário abaixo.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Essa postagem faz parte de uma &lt;a href=&quot;/categories/aprendizado-de-máquina-learning-from-data/&quot;&gt;série&lt;/a&gt; de textos que tem o objetivo de estudar, principalmente, o curso “&lt;a href=&quot;http://www.work.caltech.edu/telecourse.html&quot;&gt;Learning from Data&lt;/a&gt;”, ministrado pelo Professor Yaser Abu-Mostafa. Outros materiais utilizados serão sempre referenciados.&lt;/p&gt;
+&lt;/blockquote&gt;</content><author><name>André V. R. Amaral</name></author><category term="aprendizagem-de-maquina" /><summary type="html">Quando se fala de Aprendizado de Máquina, há pelo menos duas interpretações para o que isso significa: a primeira delas diz respeito a um conjunto de técnicas e modelos estatísticos que são usados, primariamente, para se fazer inferência (estimação pontual dos parâmetros de interesse, contrução de intervalo de confiança, teste de hipótese, etc.); enquanto que a segunda abordagem, que será a utilizada daqui para frente, se preocupa em, principalmente, fazer predição sobre novas observações $-$ nesse caso, o(s) modelo(s) utilizado(s) pode(m), inclusive, não ter forma explícita (Izbicki, R.; dos Santos, T. M. Machine Learning sob a ótica estatística). Dito isso, podemos começar.</summary></entry><entry><title type="html">Visualização de Dados com Matplotlib</title><link href="http://localhost:4000/visualizacao-de-dados-com-matplotlib/" rel="alternate" type="text/html" title="Visualização de Dados com Matplotlib" /><published>2019-12-17T00:00:00-03:00</published><updated>2019-12-17T00:00:00-03:00</updated><id>http://localhost:4000/visualizacao-de-dados-com-matplotlib</id><content type="html" xml:base="http://localhost:4000/visualizacao-de-dados-com-matplotlib/">&lt;p&gt;Uma parte essencial do processo de análise de dados é a visualização parcial e final dos resultados que foram alcançados. Na maior parte das vezes, é muito mais fácil interpretar esse tipo de informação graficamente do que através de, apenas, tabelas ou números.&lt;/p&gt;
+
+&lt;p&gt;Entretanto, mais do que apenas ser capaz de plotar gráficos, é importante que o pesquisador (ou estudante, ou cientista de dados, etc.) represente esse conjunto de dados de uma forma que sua audiência consiga entender. Você precisa ter gráficos acessíveis, confiáveis e elegantes (&lt;a href=&quot;https://www.amazon.com/Data-Visualisation-Handbook-Driven-Design/dp/1473912148&quot;&gt;Kirk, A&lt;/a&gt;. citado em &lt;a href=&quot;https://www.edx.org/course/python-data-science-uc-san-diegox-dse200x&quot;&gt;Curso edX&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;Em Python, o pacote mais básico para visualização de dados é o &lt;strong&gt;Matplotlib&lt;/strong&gt;. Ele nos permite plotar diferentes tipos de gráficos com dezenas de opções de customização. Por esse motivo, nós o escolhemos para esse tutorial.&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/visualizacao-de-dados-com-matplotlib_files/matplotlib-principal.png&quot; alt=&quot;Tela principal&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Toda a imagem mostrada acima é uma &lt;code class=&quot;highlighter-rouge&quot;&gt;Figure&lt;/code&gt; criada pelo módulo &lt;code class=&quot;highlighter-rouge&quot;&gt;matplotlib.pyplot&lt;/code&gt;; dentro dela, na área branca, estão compreendidos os eixos &lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt; e &lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt;, chamadas de &lt;code class=&quot;highlighter-rouge&quot;&gt;Axes&lt;/code&gt; ou &lt;code class=&quot;highlighter-rouge&quot;&gt;Subplot&lt;/code&gt; (existe uma pequena diferença entre esses dois termos, mas para a maioria dos casos, eles podem ser tratados como sinônimos). Além disso, no canto superior esquerdo, existe um pequeno menu que nos permite realizar algumas ações $-$ incluindo exportar o gráfico como imagem.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Observação:&lt;/strong&gt; A partir desse ponto, eu não vou mais apresentar toda a janela mostrada na figura acima; ao invés disso, apenas os gráficos serão gerados.&lt;/p&gt;
+
+&lt;p&gt;Agora que sabemos o básico, vamos importar a biblioteca e verificar se ela está funcionando.&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;matplotlib&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;inline&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;matplotlib.pyplot&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;plt&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Perceba que, na maior parte das situações, nós só temos que importar o módulo &lt;code class=&quot;highlighter-rouge&quot;&gt;pyplot&lt;/code&gt;. Assim, se nenhuma mensagem de erro apareceu, o Matplotlib foi corretamente importado.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Observação 2:&lt;/strong&gt; se você está utilizando o Jupyter Notebook para realizar seus testes, é necessário que o comando &lt;code class=&quot;highlighter-rouge&quot;&gt;%matplotlib inline&lt;/code&gt; seja incluído antes de importar a biblioteca.&lt;/p&gt;
+
+&lt;p&gt;Como você deve imaginar, a primeira coisa que temos que fazer é criar uma &lt;code class=&quot;highlighter-rouge&quot;&gt;Figure&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;fig&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;plt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;figure&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;figsize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;Figure size 216x432 with 0 Axes&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Além de criar um objeto &lt;code class=&quot;highlighter-rouge&quot;&gt;Figure&lt;/code&gt; e atribuí-lo à variável &lt;code class=&quot;highlighter-rouge&quot;&gt;fig&lt;/code&gt;, nós defimos os valores para o parâmetro &lt;code class=&quot;highlighter-rouge&quot;&gt;figsize&lt;/code&gt;, que, como o nome sugere, determina o tamanho da janela: $3 \times 6$ polegadas.&lt;/p&gt;
+
+&lt;p&gt;Agora nós criamos, dentro do “container” &lt;code class=&quot;highlighter-rouge&quot;&gt;fig&lt;/code&gt;, um objeto &lt;code class=&quot;highlighter-rouge&quot;&gt;Axes&lt;/code&gt;. Para isso, basta utilizar o método &lt;code class=&quot;highlighter-rouge&quot;&gt;add_subplot()&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_subplot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;111&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Note que, mais uma vez, nós tivemos que passar o valor de um parâmetro para a função. Nesse caso, o &lt;code class=&quot;highlighter-rouge&quot;&gt;111&lt;/code&gt; representa o número de objetos &lt;code class=&quot;highlighter-rouge&quot;&gt;Axes&lt;/code&gt; que serão criados dentro de &lt;code class=&quot;highlighter-rouge&quot;&gt;fig&lt;/code&gt;: uma array com &lt;code class=&quot;highlighter-rouge&quot;&gt;1&lt;/code&gt; linha, &lt;code class=&quot;highlighter-rouge&quot;&gt;1&lt;/code&gt; coluna e índice &lt;code class=&quot;highlighter-rouge&quot;&gt;1&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;O próximo passo é definir os dados que serão utilizados para plotar o gráfico. Para esse primeiro exemplo, eu vou criar duas listas que ilustram o comportamento da função $f(x) = 2x$ com domínio em $\lbrace 0, 1, \cdots, 10 \rbrace$:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;8&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;12&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;14&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;16&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;18&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;20&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Feito isso, agora só precisamos plotar esses valores em um sistema de coordenadas utilizando o comando &lt;code class=&quot;highlighter-rouge&quot;&gt;plot()&lt;/code&gt;; e, por fim, chamar o método &lt;code class=&quot;highlighter-rouge&quot;&gt;show()&lt;/code&gt; para mostrá-lo na tela:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# all the code togheter
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fig&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;plt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;figure&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;figsize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;6&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_subplot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;111&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scatter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;plt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;show&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/visualizacao-de-dados-com-matplotlib_files/visualizacao-de-dados-com-matplotlib_19_0.png&quot; alt=&quot;png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Observação 3&lt;/strong&gt;: mais uma vez, se você está utilizando Jupyter Notebook, talvez seja necessário que todos os comandos estejam em uma única célula.&lt;/p&gt;
+
+&lt;p&gt;Em adição ao que acabamos de fazer, é possível modificar algumas característica do gráfico, veja a seguir:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# all the code togheter
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fig&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;plt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;figure&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;figsize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# intentionally smaller than the previous one
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_subplot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;111&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;scatter&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;label&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'f(x)'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;color&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'red'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# ax1 properties
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;set_title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'My Title'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;set_xlabel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'X'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;set_ylabel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Y'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;plt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;legend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;loc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;plt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;show&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/visualizacao-de-dados-com-matplotlib_files/visualizacao-de-dados-com-matplotlib_22_0.png&quot; alt=&quot;png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Nós incluímos informações importantes com essas últimas linhas de código. No método &lt;code class=&quot;highlighter-rouge&quot;&gt;scatter()&lt;/code&gt;, nós adicionamos dois parâmetros: &lt;code class=&quot;highlighter-rouge&quot;&gt;label&lt;/code&gt;e &lt;code class=&quot;highlighter-rouge&quot;&gt;color&lt;/code&gt;. O primeiro deles é usado para identificar a curva que está sendo plotada (através do método &lt;code class=&quot;highlighter-rouge&quot;&gt;legend()&lt;/code&gt;), enquanto que o segundo define a cor dos pontos.&lt;/p&gt;
+
+&lt;p&gt;Além disso, definimos algumas novas propriedades para o objeto &lt;code class=&quot;highlighter-rouge&quot;&gt;ax1&lt;/code&gt;: o método &lt;code class=&quot;highlighter-rouge&quot;&gt;set_title()&lt;/code&gt; define o título do gráfico, e os métodos &lt;code class=&quot;highlighter-rouge&quot;&gt;set_xlabel&lt;/code&gt; e &lt;code class=&quot;highlighter-rouge&quot;&gt;set_ylabel&lt;/code&gt; definem os rótulos que serão utilizados nos eixos $x$ e $y$, respectivamente.&lt;/p&gt;
+
+&lt;p&gt;A biblioteca Matplotlib, como mencionado no começo desse texto, é muito flexível; por isso, a fim de extrair todo o seu potencial, é importante que você leia a &lt;a href=&quot;https://matplotlib.org/contents.html&quot;&gt;documentação oficial&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;Finalmente, um outro exemplo, um pouco mais complexo, será apresentado. Primeiro, veja o seguinte código:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;numpy&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# create a new figure
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;fig&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;plt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;figure&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;figsize&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# create two new Axes objects in the format of a '1 row x 2 columns' array
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_subplot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;121&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ax2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;fig&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add_subplot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;122&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# create the data set that will be plotted
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;linspace&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;y&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sin&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# y = f(x) = sin(x)
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;z&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;cos&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# z = g(x) = cos(x)
+&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# plot f(x) and g(x)
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;plot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;y&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;label&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'sin'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;color&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'b'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# 'b' stands for 'blue'
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ax2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;plot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;x&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;z&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;label&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'cos'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;color&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'r'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# 'r' stands for 'red'
+&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# set 'ax1' properties
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;set_title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Trigonometric Functions - SINE'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;set_xlabel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Angle (in radian)'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;set_ylabel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Magnitude'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;axis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;1.25&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;1.25&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# define the range of both axes
+# define ticks for each axis (3 auxiliary variables)
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xticks&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;1.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;                         &lt;span class=&quot;c1&quot;&gt;# define the ticks values - 'X' axis
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xlabel&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'0'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'$&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;frac{&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;pi}{2}$'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'$&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;pi$'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'$&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;frac{3&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;pi}{2}$'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'$2&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;pi$'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# define the label values - 'X' axis
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;yticks&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;                                                 &lt;span class=&quot;c1&quot;&gt;# define the ticks values - 'Y' axis
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xaxis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ticks&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;xticks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ticklabels&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;xlabel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;yaxis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ticks&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;yticks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ax1&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;legend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;loc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# set 'ax1' properties
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ax2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;set_title&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Trigonometric Functions - COSINE'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ax2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;set_xlabel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Angle (in radian)'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ax2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;set_ylabel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Magnitude'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ax2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;axis&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;1.25&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;1.25&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# define the range of both axes
+# define ticks for each axis (3 auxiliary variables)
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xticks&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;/&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;1.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;pi&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;*&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;                         &lt;span class=&quot;c1&quot;&gt;# define the ticks values - 'X' axis
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xlabel&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'0'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'$&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;frac{&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;pi}{2}$'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'$&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;pi$'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'$&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;frac{3&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;pi}{2}$'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'$2&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\\&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;pi$'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# define the label values - 'X' axis
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;yticks&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;-&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;                                                 &lt;span class=&quot;c1&quot;&gt;# define the ticks values - 'Y' axis
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ax2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;xaxis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ticks&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;xticks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;ticklabels&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;xlabel&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ax2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;yaxis&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ticks&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;yticks&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;ax2&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;legend&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;loc&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;plt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;tight_layout&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# fix the spaces between the two Axes
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;plt&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;show&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/visualizacao-de-dados-com-matplotlib_files/visualizacao-de-dados-com-matplotlib_27_0.png&quot; alt=&quot;png&quot; /&gt;&lt;/p&gt;
+
+&lt;p&gt;Nós acabamos de criar uma &lt;code class=&quot;highlighter-rouge&quot;&gt;Figure&lt;/code&gt; com dois &lt;code class=&quot;highlighter-rouge&quot;&gt;Subplot&lt;/code&gt;’s dentro dela. As imagens da esquerda e da direita são definidas pelas funções seno e cosseno, respectivametne. Além disso, há algumas coisas novas aqui; por isso, os próximos parágrafos serão dedicados a esses detalhes.&lt;/p&gt;
+
+&lt;p&gt;Depois de importar, além do Matplotlib, o Numpy (veja &lt;a href=&quot;/introducao-numpy-pandas/&quot;&gt;aqui&lt;/a&gt; um pequeno tutorial sobre Numpy e Pandas), nós criamos uma &lt;code class=&quot;highlighter-rouge&quot;&gt;Figure&lt;/code&gt; com um tamanho específico. Agora, utilizando esse objeto, que foi armazenado na variável &lt;code class=&quot;highlighter-rouge&quot;&gt;fig&lt;/code&gt;, foram criados dois &lt;code class=&quot;highlighter-rouge&quot;&gt;Subplot&lt;/code&gt;’s $-$ &lt;strong&gt;Importante:&lt;/strong&gt; note que para o primeiro objeto, o valor do parâmetro foi &lt;code class=&quot;highlighter-rouge&quot;&gt;121&lt;/code&gt;(que significa &lt;code class=&quot;highlighter-rouge&quot;&gt;1&lt;/code&gt; linha, &lt;code class=&quot;highlighter-rouge&quot;&gt;2&lt;/code&gt; colunas e o índice &lt;code class=&quot;highlighter-rouge&quot;&gt;1&lt;/code&gt;), enquanto que para o segundo, esse número teve que ser definido como &lt;code class=&quot;highlighter-rouge&quot;&gt;122&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Nas linhas seguintes, a única coisa que fizemos foi criar os nossos vetores de dados &lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt;, &lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt; e &lt;code class=&quot;highlighter-rouge&quot;&gt;z&lt;/code&gt;. Com o Numpy, nós geramos uma lista, atribuída a &lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt;, de valores igualmente espaçados entre $0$ e $2\pi$; então, nas variáveis &lt;code class=&quot;highlighter-rouge&quot;&gt;y&lt;/code&gt; e &lt;code class=&quot;highlighter-rouge&quot;&gt;z&lt;/code&gt;, nós calculamos e salvamos os valores de seno e cosseno de &lt;code class=&quot;highlighter-rouge&quot;&gt;x&lt;/code&gt;, respectivamente.&lt;/p&gt;
+
+&lt;p&gt;Depois disso tudo, diferentemente do primeiro exemplo, utilizamos o método &lt;code class=&quot;highlighter-rouge&quot;&gt;plot()&lt;/code&gt; (ao invés de &lt;code class=&quot;highlighter-rouge&quot;&gt;scatter()&lt;/code&gt;). Essa modificação faz com que o gráfico de pontos seja, agora, exibido como gráfico de linha.&lt;/p&gt;
+
+&lt;p&gt;Por fim, sobre as propriedades de &lt;code class=&quot;highlighter-rouge&quot;&gt;ax1&lt;/code&gt; e &lt;code class=&quot;highlighter-rouge&quot;&gt;ax2&lt;/code&gt;, descreverei apenas os atributos e métodos que ainda não foram discutidos. A primeira novidade é o método &lt;code class=&quot;highlighter-rouge&quot;&gt;axis()&lt;/code&gt;, que define os valores mínimo e máximo que serão mostrados em cada eixo do gráfico $-$ perceba que é necessário passar uma &lt;strong&gt;lista&lt;/strong&gt; de números. Além disso, nós também criamos algumas variáveis que foram utilizadas para definir os parametros &lt;code class=&quot;highlighter-rouge&quot;&gt;ticks&lt;/code&gt; e &lt;code class=&quot;highlighter-rouge&quot;&gt;ticklabes&lt;/code&gt; dos métodos &lt;code class=&quot;highlighter-rouge&quot;&gt;xaxis.set()&lt;/code&gt; e &lt;code class=&quot;highlighter-rouge&quot;&gt;yaxis.set()&lt;/code&gt;. Esses métodos definem em quais pontos ao longo dos eixos você terá um indicador de valor.&lt;/p&gt;
+
+&lt;p&gt;Um pequeno detalhe é o de que foi necessário, antes de chamar o método &lt;code class=&quot;highlighter-rouge&quot;&gt;show()&lt;/code&gt;, utilizar a função &lt;code class=&quot;highlighter-rouge&quot;&gt;tight_layout()&lt;/code&gt; a fim de ajustar o tamanho e espaçamento dos gráficos.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusão&quot;&gt;Conclusão&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Matplotlib&lt;/strong&gt; é uma biblioteca muito flexível e poderosa que nos permite criar diferentes tipos de gráficos. Além disso, como mencionado anteriormente, existe uma galeria oficial cheia de exemplos reais criados a partir dessa ferramenta $-$ confira, e veja todas as possibilidades.&lt;/p&gt;
+
+&lt;p&gt;Qualquer dúvida, sugestão ou &lt;em&gt;feedback&lt;/em&gt;, por favor, deixe um comentário abaixo.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Eu havia escrito esse texto, originalmente em inglês, em uma antiga versão do blog que já não existe mais. Pequenas correções e atualizações, além da própria tradução, foram feitas para que o conteúdo continuasse relevante.&lt;/p&gt;
+&lt;/blockquote&gt;</content><author><name>André V. R. Amaral</name></author><category term="python" /><category term="ciencia-de-dados" /><summary type="html">Uma parte essencial do processo de análise de dados é a visualização parcial e final dos resultados que foram alcançados. Na maior parte das vezes, é muito mais fácil interpretar esse tipo de informação graficamente do que através de, apenas, tabelas ou números.</summary></entry><entry><title type="html">Uma Introdução ao NumPy e Pandas para Análise de Dados</title><link href="http://localhost:4000/introducao-numpy-pandas/" rel="alternate" type="text/html" title="Uma Introdução ao NumPy e Pandas para Análise de Dados" /><published>2019-12-16T00:00:00-03:00</published><updated>2019-12-16T00:00:00-03:00</updated><id>http://localhost:4000/introducao-numpy-pandas</id><content type="html" xml:base="http://localhost:4000/introducao-numpy-pandas/">&lt;p&gt;Python oferece muitas bibliotecas que extendem suas funcionalidades padrão. Por esse motivo, quando vamos trabalhar com processamento de dados, existem dois pacotes muito úteis que podemos utilizar: &lt;strong&gt;Numpy&lt;/strong&gt; e &lt;strong&gt;Pandas&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Numpy&lt;/strong&gt; cria um novo objeto array multidimensional que nos permite estruturar e operar nosso conjunto de dados de maneira fácil (e muito mais rápido que as tradicionais listas do Python). Além disso, nós também temos o &lt;strong&gt;Pandas&lt;/strong&gt;, uma biblioteca de alto-nível construída sobre o código do Numpy que oferece dois novos tipos de estrutura de dados: &lt;code class=&quot;highlighter-rouge&quot;&gt;Series&lt;/code&gt; e &lt;code class=&quot;highlighter-rouge&quot;&gt;DataFrame&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;A primeira coisa que temos que fazer antes de usar essas bibliotecas é importá-las. Para isso, veja as duas linhas de código a seguir:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;numpy&lt;/span&gt;  &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;pandas&lt;/span&gt; &lt;span class=&quot;k&quot;&gt;as&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pd&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Agora, nós podemos conferir se os pacotes foram importadas de maneira correta imprimindo suas versões:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Numpy  -&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__version__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Pandas -&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pd&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;__version__&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Numpy  - 1.17.4
+Pandas - 0.25.3
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Como dito anteriormente, NumPy é uma biblioteca de baixo-nível, se comparada ao Pandas. Por esse motivo, nós vamos começar com ela, criando algumas arrays.&lt;/p&gt;
+
+&lt;p&gt;A fim de criar uma array de 1 dimensão (1D), digite:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;my_array&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;dtype&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&quot;int16&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;my_array&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;array([0, 1, 2], dtype=int16)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Note que nós criamos uma variável chamada &lt;code class=&quot;highlighter-rouge&quot;&gt;my_array&lt;/code&gt; e atribuímos a ela uma array de três elementos: $\lbrace0, 1, 2\rbrace$. Em adição, nós também determinamos o parâmetro &lt;code class=&quot;highlighter-rouge&quot;&gt;dtype&lt;/code&gt; $-$ isso é importante porque, diferente do que acontece com as variáveis padrão no Python, a biblioteca NumPy nos permite dizer quanto de espaço será alocado na memória para salvar um determinado objeto; nesse sentido, NumPy é mais parecido com a linguagem C, na qual você deve que determinar a quantidade de bits que será utilizada para armazenar algo.&lt;/p&gt;
+
+&lt;p&gt;Continuando com a mesma sintaxe, nós podemos criar arrays $n$ dimensionais.&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# 2D array (2, 2)
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my2D_array&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;11&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;12&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;21&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;22&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]])&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;2D array, with dtype = {}: &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my2D_array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dtype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;my2D_array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# 3D array (2, 2, 2)
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my3D_array&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([[[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;111&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;112&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;121&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;122&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]],&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;211&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;212&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;221&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;222&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]]])&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;3D array, with dtype = {}: &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my3D_array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dtype&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;my3D_array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;2D array, with dtype = int64: 
+[[11 12]
+ [21 22]]
+
+3D array, with dtype = int64: 
+[[[111 112]
+  [121 122]]
+
+ [[211 212]
+  [221 222]]]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Note que, para o caso &lt;code class=&quot;highlighter-rouge&quot;&gt;my2D_array&lt;/code&gt;, nós criamos uma array de 2 dimensões com 2 linhas e 2 colunas; i.e., $(2 \times 2)$. Por outro lado, considerando a variável &lt;code class=&quot;highlighter-rouge&quot;&gt;my3D_array&lt;/code&gt;, uma array de 3 dimensões, com 2 linhas, 2 colunas e 2 camadas de produnfidade $-$ ou seja, $(2 \times 2 \times 2)$ $-$, foi criada. Por fim, perceba que, como não determinamos manualmente o atributo &lt;code class=&quot;highlighter-rouge&quot;&gt;dtype&lt;/code&gt;, a biblioteca Numpy o definiu como &lt;code class=&quot;highlighter-rouge&quot;&gt;int64&lt;/code&gt;, justificado pelos valores que cada umas das arrays assumiu.&lt;/p&gt;
+
+&lt;p&gt;Dessa forma, se quisermos fatiar alguns desses elementos, podemos tratar essas arrays de maneira similar às listas do Python:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# on the 2D array, we want to slice the first row: (11, 12)
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;My 2D sliced array:&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;my2D_array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:])&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# on the 3D array, we want to slice the elements of the second row and second column for both layers of depth: (221, 222)
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;My 3D sliced array:&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;my3D_array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;:])&lt;/span&gt;
+
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;My 2D sliced array: [11 12]
+My 3D sliced array: [221 222]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Nesse exemplo, é importante notar que os índices começam de 0 (como de costume).&lt;/p&gt;
+
+&lt;p&gt;Além desses comandos simples, Numpy também disponibiliza uma grande quantidade de métodos e atributos que podem ser utilizados para realizar tarefas específicas. Vou demonstrar alguns deles, mas para uma lista completa, acesse a documentação oficial (&lt;a href=&quot;https://docs.scipy.org/doc/numpy-dev/reference/&quot;&gt;Numpy Doc&lt;/a&gt;).&lt;/p&gt;
+
+&lt;p&gt;Em relação às operações matemáticas, esses são os métodos mais utilizados:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# create two arrays that will be used on the math operations
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]])&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# array([[1, 2],
+&lt;/span&gt;                               &lt;span class=&quot;c1&quot;&gt;#        [3, 4]])
+&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;b&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;3&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;],&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]])&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;# array([[4, 3],
+&lt;/span&gt;                               &lt;span class=&quot;c1&quot;&gt;#        [2, 1]])
+&lt;/span&gt;
+&lt;span class=&quot;c1&quot;&gt;# Element by element addition
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Addition (element by element): &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;add&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# Element by element subtraction
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Subraction (element by element): &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;subtract&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# Element by element multiplication
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Multiplication (element by element): &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;multiply&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# Matrix multiplication
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Matrix multiplication: &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dot&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# Element by element division
+&lt;/span&gt;&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Division (element by element): &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{}&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;divide&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;a&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;b&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Addition (element by element): 
+[[5 5]
+ [5 5]]
+
+Subraction (element by element): 
+[[-3 -1]
+ [ 1  3]]
+
+Multiplication (element by element): 
+[[4 6]
+ [6 4]]
+
+Matrix multiplication: 
+[[ 8  5]
+ [20 13]]
+
+Division (element by element): 
+[[0.25       0.66666667]
+ [1.5        4.        ]]
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;O método mais importante aqui é o &lt;code class=&quot;highlighter-rouge&quot;&gt;np.dot(array_1, array_2)&lt;/code&gt;, que faz a multiplicação “adequada” de duas matrizes; em contraponto ao método &lt;code class=&quot;highlighter-rouge&quot;&gt;np.multiply(array_1, array_2)&lt;/code&gt;, que realiza o produto termo a termo das duas arrays.&lt;/p&gt;
+
+&lt;p&gt;Por fim, antes de começarmos a trabalhar com a biblioteca Pandas, tem mais um exemplo que gostaria de apresentar. Veja a seguir:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# create a 1D array with elements [0, 25[; then reshape it to a 2D array with 5 rows and 5 cols
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;an_array&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;array&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arange&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;25&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reshape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;an_array&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;array([[ 0,  1,  2,  3,  4],
+       [ 5,  6,  7,  8,  9],
+       [10, 11, 12, 13, 14],
+       [15, 16, 17, 18, 19],
+       [20, 21, 22, 23, 24]])
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Shape of the array:&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;an_array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;shape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Number of dimensions:&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;an_array&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;ndim&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Shape of the array: (5, 5)
+Number of dimensions: 2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Com esses dois pedaços de código acima, nós conseguimos aprender um pouco mais sobre algumas funcionalidades do Numpy. Primeiro, nós criarmos uma array unidimensioal com 25 elementos $\lbrace 0, 1, \cdots, 23, 24 \rbrace$; então, na mesma linha de código, nós utilizamos o método &lt;code class=&quot;highlighter-rouge&quot;&gt;reshape()&lt;/code&gt; e transformamos esse objeto em uma array $(5 \times 5)$. Finalmente, o “formato” e o número de dimensões da array foram impressos utilizando os atributos &lt;code class=&quot;highlighter-rouge&quot;&gt;shape&lt;/code&gt; e &lt;code class=&quot;highlighter-rouge&quot;&gt;ndim&lt;/code&gt;, respectivamente.&lt;/p&gt;
+
+&lt;p&gt;Exitem dezenas de outros métodos e atributos diferentes para se explorar com o Numpy, mas isso foi suficiente para uma introdução. Vamos agora trabalhar com o Pandas.&lt;/p&gt;
+
+&lt;p&gt;A biblioteca Pandas, como dito no começo do tutorial, fornece duas novas estruturas que serão extremamente importantes para o processamento de dados. Enquanto a estrutura &lt;code class=&quot;highlighter-rouge&quot;&gt;Series&lt;/code&gt; equivale a uma array com rótulos de 1 dimensão, um &lt;code class=&quot;highlighter-rouge&quot;&gt;DataFrame&lt;/code&gt; é uma array de duas dimensões que pode ter colunas heterogêneas (o que significa que podemos ter cada coluna de um &lt;code class=&quot;highlighter-rouge&quot;&gt;Data Frame&lt;/code&gt; armazenando um tipo de dado diferente). Sendo assim, como é possível de se imaginar, um conjunto de &lt;code class=&quot;highlighter-rouge&quot;&gt;Series&lt;/code&gt; forma um  &lt;code class=&quot;highlighter-rouge&quot;&gt;DataFrame&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Agora, podemos começar a escrever algum código utilizando Pandas. Vamos ver como criar e utilizar essas novas ferramentas:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# create a pair of new Series
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s1&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pd&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Series&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'A'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'B'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'C'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;s2&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pd&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Series&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;mf&quot;&gt;1.2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;0.7&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mf&quot;&gt;3.0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Series 1: &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Series 2: &lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\n&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;{}&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;s2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Series 1: 
+0    A
+1    B
+2    C
+dtype: object
+
+Series 2: 
+0    1.2
+1    0.7
+2    3.0
+dtype: float64
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Note que a sintaxe é bem intuitiva; entretanto, o aspecto mais importantes vem do fato de que agora temos duas sequências explicitamente rotuladas e que podem ser combinadas para criar um &lt;code class=&quot;highlighter-rouge&quot;&gt;DataFrame&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Um &lt;code class=&quot;highlighter-rouge&quot;&gt;DataFrame&lt;/code&gt; pode ser encarado como um dicinário de &lt;code class=&quot;highlighter-rouge&quot;&gt;Series&lt;/code&gt;; assim, a fim de criar um objeto desse tipo, podemos utilizar o seguinte código:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# create a dictionary with the previous Series (s1 and s2)
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'1st col'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'2nd col'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;s2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# create a DataFrame with this dictionary
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my_df&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pd&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DataFrame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;data&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;my_df&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div&gt;
+&lt;style scoped=&quot;&quot;&gt;
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+&lt;/style&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;1st col&lt;/th&gt;
+      &lt;th&gt;2nd col&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;A&lt;/td&gt;
+      &lt;td&gt;1.2&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;B&lt;/td&gt;
+      &lt;td&gt;0.7&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;C&lt;/td&gt;
+      &lt;td&gt;3.0&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Note que nós começamos com dois objetos do tipo &lt;code class=&quot;highlighter-rouge&quot;&gt;Series&lt;/code&gt;, e então os combinamos para criar um &lt;code class=&quot;highlighter-rouge&quot;&gt;DataFrame&lt;/code&gt;. Temos, agora, um conjunto tabulado com informações heterogêneas.&lt;/p&gt;
+
+&lt;p&gt;Nesse segundo exemplo, vamos criar um &lt;code class=&quot;highlighter-rouge&quot;&gt;DataFrame&lt;/code&gt; preenchendo-o com os elementos de uma array criada utilizando Numpy.&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;my_dataFrame&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pd&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DataFrame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;np&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;arange&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;50&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;reshape&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;5&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;),&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;columns&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'1st'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'2nd'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'3rd'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'4th'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'5th'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;my_dataFrame&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div&gt;
+&lt;style scoped=&quot;&quot;&gt;
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+&lt;/style&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;1st&lt;/th&gt;
+      &lt;th&gt;2nd&lt;/th&gt;
+      &lt;th&gt;3rd&lt;/th&gt;
+      &lt;th&gt;4th&lt;/th&gt;
+      &lt;th&gt;5th&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;0&lt;/td&gt;
+      &lt;td&gt;1&lt;/td&gt;
+      &lt;td&gt;2&lt;/td&gt;
+      &lt;td&gt;3&lt;/td&gt;
+      &lt;td&gt;4&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;5&lt;/td&gt;
+      &lt;td&gt;6&lt;/td&gt;
+      &lt;td&gt;7&lt;/td&gt;
+      &lt;td&gt;8&lt;/td&gt;
+      &lt;td&gt;9&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;10&lt;/td&gt;
+      &lt;td&gt;11&lt;/td&gt;
+      &lt;td&gt;12&lt;/td&gt;
+      &lt;td&gt;13&lt;/td&gt;
+      &lt;td&gt;14&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;3&lt;/th&gt;
+      &lt;td&gt;15&lt;/td&gt;
+      &lt;td&gt;16&lt;/td&gt;
+      &lt;td&gt;17&lt;/td&gt;
+      &lt;td&gt;18&lt;/td&gt;
+      &lt;td&gt;19&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;20&lt;/td&gt;
+      &lt;td&gt;21&lt;/td&gt;
+      &lt;td&gt;22&lt;/td&gt;
+      &lt;td&gt;23&lt;/td&gt;
+      &lt;td&gt;24&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;5&lt;/th&gt;
+      &lt;td&gt;25&lt;/td&gt;
+      &lt;td&gt;26&lt;/td&gt;
+      &lt;td&gt;27&lt;/td&gt;
+      &lt;td&gt;28&lt;/td&gt;
+      &lt;td&gt;29&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;6&lt;/th&gt;
+      &lt;td&gt;30&lt;/td&gt;
+      &lt;td&gt;31&lt;/td&gt;
+      &lt;td&gt;32&lt;/td&gt;
+      &lt;td&gt;33&lt;/td&gt;
+      &lt;td&gt;34&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;7&lt;/th&gt;
+      &lt;td&gt;35&lt;/td&gt;
+      &lt;td&gt;36&lt;/td&gt;
+      &lt;td&gt;37&lt;/td&gt;
+      &lt;td&gt;38&lt;/td&gt;
+      &lt;td&gt;39&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;8&lt;/th&gt;
+      &lt;td&gt;40&lt;/td&gt;
+      &lt;td&gt;41&lt;/td&gt;
+      &lt;td&gt;42&lt;/td&gt;
+      &lt;td&gt;43&lt;/td&gt;
+      &lt;td&gt;44&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;9&lt;/th&gt;
+      &lt;td&gt;45&lt;/td&gt;
+      &lt;td&gt;46&lt;/td&gt;
+      &lt;td&gt;47&lt;/td&gt;
+      &lt;td&gt;48&lt;/td&gt;
+      &lt;td&gt;49&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Como é possível ver, nós criamos &lt;code class=&quot;highlighter-rouge&quot;&gt;DataFrame&lt;/code&gt; a partir uma array de duas dimensões gerada utilizando Numpy.&lt;/p&gt;
+
+&lt;p&gt;Uma das operações mais úteis que podemos fazer com essa nova estrutura é, mais uma vez, fatiá-la. Para fazer isso, podemos utilizar o atributo &lt;code class=&quot;highlighter-rouge&quot;&gt;iloc[]&lt;/code&gt; a fim de selecionar uma porção do &lt;code class=&quot;highlighter-rouge&quot;&gt;DataFrame&lt;/code&gt; original.&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# using the same &quot;my_dataFrame&quot; DataFrame
+# select the 3rd and 4th columns and the rows with indexes from 4 to 8
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my_dataFrame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'3rd'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'4th'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]]&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;iloc&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;9&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div&gt;
+&lt;style scoped=&quot;&quot;&gt;
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+&lt;/style&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;3rd&lt;/th&gt;
+      &lt;th&gt;4th&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;22&lt;/td&gt;
+      &lt;td&gt;23&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;5&lt;/th&gt;
+      &lt;td&gt;27&lt;/td&gt;
+      &lt;td&gt;28&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;6&lt;/th&gt;
+      &lt;td&gt;32&lt;/td&gt;
+      &lt;td&gt;33&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;7&lt;/th&gt;
+      &lt;td&gt;37&lt;/td&gt;
+      &lt;td&gt;38&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;8&lt;/th&gt;
+      &lt;td&gt;42&lt;/td&gt;
+      &lt;td&gt;43&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Perceba que, se você quiser selecionar mais de uma coluna, terá que utilizar um lista para agrupá-las.&lt;/p&gt;
+
+&lt;p&gt;A próxima alternativa para fatiar um &lt;code class=&quot;highlighter-rouge&quot;&gt;DataFrame&lt;/code&gt; é criando uma máscara que utiliza algum tipo de condicional; por exemplo, se nós quisermos recuperar, na terceira coluna (&lt;code class=&quot;highlighter-rouge&quot;&gt;3rd&lt;/code&gt;), os valores que são maiores que 20, nós podemos fazer o seguinte:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# create a mask
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mask&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;my_dataFrame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'3rd'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;&amp;gt;&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;30&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# apply the mask to the &quot;3rd&quot; column in order to slice the DataFrame considering the given condition
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;my_dataFrame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'3rd'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;][&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;6    32
+7    37
+8    42
+9    47
+Name: 3rd, dtype: int64
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Note que nós primeiro criamos a máscara, e então a aplicamos sobre o &lt;code class=&quot;highlighter-rouge&quot;&gt;DataFrame&lt;/code&gt;, escolhendo tanto as colunas (&lt;code class=&quot;highlighter-rouge&quot;&gt;3rd&lt;/code&gt;) quanto as linhas (aquelas que tem valor maior que 30) desejadas.&lt;/p&gt;
+
+&lt;p&gt;Finalmente, nós vamos ver alguns métodos da biblioteca Pandas; porém, como já dito anteriormente, eu recomendo fortemente que você leia a &lt;a href=&quot;http://pandas.pydata.org/pandas-docs/stable/index.html&quot;&gt;documentação oficial do Pandas&lt;/a&gt;.&lt;/p&gt;
+
+&lt;p&gt;A seguir, vamos criar um conjunto de dados para os nossos próximos exemplos.&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# let's create a DataFrame for the next demonstrations
+&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;col_labels&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Name'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'Age'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'Nationality'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;        &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pd&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Series&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'André'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'James'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'Agata'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'María'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'Pedro'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'Juan'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'Paul'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;age&lt;/span&gt;         &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pd&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Series&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;23&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;27&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;21&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;None&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;27&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;22&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;25&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;nationality&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pd&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;Series&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;([&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Brazilian'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'American'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'Greek'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'Mexican'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'Brazilian'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'Mexican'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'British'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;])&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;people&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;col_labels&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;name&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+          &lt;span class=&quot;n&quot;&gt;col_labels&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;age&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt;
+          &lt;span class=&quot;n&quot;&gt;col_labels&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;2&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]:&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;nationality&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;df_people&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;pd&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;DataFrame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;people&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;df_people&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;head&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div&gt;
+&lt;style scoped=&quot;&quot;&gt;
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+&lt;/style&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;Name&lt;/th&gt;
+      &lt;th&gt;Age&lt;/th&gt;
+      &lt;th&gt;Nationality&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;André&lt;/td&gt;
+      &lt;td&gt;23.0&lt;/td&gt;
+      &lt;td&gt;Brazilian&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;James&lt;/td&gt;
+      &lt;td&gt;27.0&lt;/td&gt;
+      &lt;td&gt;American&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;Agata&lt;/td&gt;
+      &lt;td&gt;21.0&lt;/td&gt;
+      &lt;td&gt;Greek&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;3&lt;/th&gt;
+      &lt;td&gt;María&lt;/td&gt;
+      &lt;td&gt;NaN&lt;/td&gt;
+      &lt;td&gt;Mexican&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;Pedro&lt;/td&gt;
+      &lt;td&gt;27.0&lt;/td&gt;
+      &lt;td&gt;Brazilian&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+
+&lt;p&gt;A primeira coisa a observar, é a ulização do médoto &lt;code class=&quot;highlighter-rouge&quot;&gt;head()&lt;/code&gt;, que retorna, por padrão, apenas as 5 primeiras linhas do nosso banco de dados. É mais conveniente visualizar apenas as primeiras linhas do &lt;code class=&quot;highlighter-rouge&quot;&gt;DataFrame&lt;/code&gt; quando o conjunto de dados com o qual se está trabalhando é grande demais. Além disso, uma das idades (&lt;code class=&quot;highlighter-rouge&quot;&gt;Age&lt;/code&gt;) está “em branco” (isso é muito comum em aplicações do mundo real, e nós vamos ver como tratar esse tipo de problema).&lt;/p&gt;
+
+&lt;p&gt;Nós podemos começar lidando com o valor &lt;code class=&quot;highlighter-rouge&quot;&gt;None&lt;/code&gt;. Existem algumas estratégias diferentes que podemos tomar; entretanto, a fim de manter esse tutorial o mais simples possível, vamos apenas eliminar a linha que contém esse problema. Para fazer isso, podemos utilizar o método &lt;code class=&quot;highlighter-rouge&quot;&gt;dropna()&lt;/code&gt;:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;df_people&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;dropna&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;inplace&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;df_people&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div&gt;
+&lt;style scoped=&quot;&quot;&gt;
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+&lt;/style&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;Name&lt;/th&gt;
+      &lt;th&gt;Age&lt;/th&gt;
+      &lt;th&gt;Nationality&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;André&lt;/td&gt;
+      &lt;td&gt;23.0&lt;/td&gt;
+      &lt;td&gt;Brazilian&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;1&lt;/th&gt;
+      &lt;td&gt;James&lt;/td&gt;
+      &lt;td&gt;27.0&lt;/td&gt;
+      &lt;td&gt;American&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;2&lt;/th&gt;
+      &lt;td&gt;Agata&lt;/td&gt;
+      &lt;td&gt;21.0&lt;/td&gt;
+      &lt;td&gt;Greek&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;Pedro&lt;/td&gt;
+      &lt;td&gt;27.0&lt;/td&gt;
+      &lt;td&gt;Brazilian&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;5&lt;/th&gt;
+      &lt;td&gt;Juan&lt;/td&gt;
+      &lt;td&gt;22.0&lt;/td&gt;
+      &lt;td&gt;Mexican&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;6&lt;/th&gt;
+      &lt;td&gt;Paul&lt;/td&gt;
+      &lt;td&gt;25.0&lt;/td&gt;
+      &lt;td&gt;British&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Como é possível de ser visto, nós removemos a linha com índice 3. Para fazer isso de forma permanente, foi necessário atribuir o valor &lt;code class=&quot;highlighter-rouge&quot;&gt;True&lt;/code&gt; ao parâmetro &lt;code class=&quot;highlighter-rouge&quot;&gt;inplace&lt;/code&gt;.&lt;/p&gt;
+
+&lt;p&gt;Agora, nós podemos ter uma visão geral do conjunto de dados utilizando o método &lt;code class=&quot;highlighter-rouge&quot;&gt;info()&lt;/code&gt;.&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;df_people&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;info&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&amp;lt;class 'pandas.core.frame.DataFrame'&amp;gt;
+Int64Index: 6 entries, 0 to 6
+Data columns (total 3 columns):
+Name           6 non-null object
+Age            6 non-null float64
+Nationality    6 non-null object
+dtypes: float64(1), object(2)
+memory usage: 192.0+ bytes
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Veja que o método utlizado nós mostrou que temos 6 entradas não nulas para cada uma das 3 colunas.&lt;/p&gt;
+
+&lt;p&gt;A seguir, vamos assumir que queremos saber a média de idade das pessoas com nacionalidade brasileira (&lt;code class=&quot;highlighter-rouge&quot;&gt;Brazilian&lt;/code&gt;). Para essa situação hipotética, a primeira coisa que temos que fazer é criar uma máscara para selecionar os invíduos que nasceram no Brasil.&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c1&quot;&gt;# create a mask
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n_mask&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;df_people&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;'Nationality'&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;==&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;'Brazilian'&lt;/span&gt;
+
+&lt;span class=&quot;c1&quot;&gt;# apply the mask
+&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;df_people&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n_mask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div&gt;
+&lt;style scoped=&quot;&quot;&gt;
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+&lt;/style&gt;
+&lt;table border=&quot;1&quot; class=&quot;dataframe&quot;&gt;
+  &lt;thead&gt;
+    &lt;tr style=&quot;text-align: right;&quot;&gt;
+      &lt;th&gt;&lt;/th&gt;
+      &lt;th&gt;Name&lt;/th&gt;
+      &lt;th&gt;Age&lt;/th&gt;
+      &lt;th&gt;Nationality&lt;/th&gt;
+    &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+    &lt;tr&gt;
+      &lt;th&gt;0&lt;/th&gt;
+      &lt;td&gt;André&lt;/td&gt;
+      &lt;td&gt;23.0&lt;/td&gt;
+      &lt;td&gt;Brazilian&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+      &lt;th&gt;4&lt;/th&gt;
+      &lt;td&gt;Pedro&lt;/td&gt;
+      &lt;td&gt;27.0&lt;/td&gt;
+      &lt;td&gt;Brazilian&lt;/td&gt;
+    &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Com essas linhas de código, nós filtramos o &lt;code class=&quot;highlighter-rouge&quot;&gt;DataFrame&lt;/code&gt; para mostrar apenas as pessoas com nacionalidade brasileira. Falta, então, calcular a média de suas idades:&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;n&quot;&gt;average_age&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;df_people&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;n_mask&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;mean&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt;
+&lt;span class=&quot;n&quot;&gt;average_age&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;Age    25.0
+dtype: float64
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Note que o resultado é uma estrutura do tipo &lt;code class=&quot;highlighter-rouge&quot;&gt;Series&lt;/code&gt;. Dessa forma, se quisermos formatá-lo, podemos utilizar o atributo &lt;code class=&quot;highlighter-rouge&quot;&gt;values&lt;/code&gt;, que retorna os valores do objeto em questão como uma array Numpy.&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;The average age of the Brazilian citizens is {:.0f} years.&quot;&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;format&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;average_age&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;values&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;[&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;]))&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;The average age of the Brazilian citizens is 25 years.
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;h2 id=&quot;conclusão&quot;&gt;Conclusão&lt;/h2&gt;
+
+&lt;p&gt;&lt;strong&gt;Numpy&lt;/strong&gt; e &lt;strong&gt;Pandas&lt;/strong&gt; são duas bibliotecas essenciais para se trabalhar com análise de dados. &lt;strong&gt;Numpy&lt;/strong&gt; introduz objetos do tipo &lt;code class=&quot;highlighter-rouge&quot;&gt;ndarray&lt;/code&gt; (arrays $n$ dimensionais) e o &lt;strong&gt;Pandas&lt;/strong&gt; implementa duas novas estruturas de dados: &lt;code class=&quot;highlighter-rouge&quot;&gt;Series&lt;/code&gt; e &lt;code class=&quot;highlighter-rouge&quot;&gt;DataFrame&lt;/code&gt;. Dessa forma, se você quiser utilizar os conceitos de ciência de dados, aprendizagem de máquina, etc. nos seus projetos com Python, você deve aprender a utilizar essas excelentes ferramentas.&lt;/p&gt;
+
+&lt;p&gt;Qualquer dúvida, sugestão ou &lt;em&gt;feedback&lt;/em&gt;, por favor, deixe um comentário abaixo.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Eu havia escrito esse texto, originalmente em inglês, em uma antiga versão do blog que já não existe mais. Pequenas correções e atualizações, além da própria tradução, foram feitas para que o conteúdo continuasse relevante.&lt;/p&gt;
+&lt;/blockquote&gt;</content><author><name>André V. R. Amaral</name></author><category term="python" /><category term="ciencia-de-dados" /><summary type="html">Python oferece muitas bibliotecas que extendem suas funcionalidades padrão. Por esse motivo, quando vamos trabalhar com processamento de dados, existem dois pacotes muito úteis que podemos utilizar: Numpy e Pandas.</summary></entry></feed>

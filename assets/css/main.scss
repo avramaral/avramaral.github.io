@@ -1,0 +1,25 @@
+---
+# Only the main Sass file needs front matter (the dashes are enough)
+---
+
+$link-color: #454545;
+
+.highlight{color: #494e52; background: #f0f0f0;}
+.language-python.highlighter-rouge .highlight .highlight, .language-r.highlighter-rouge .highlight .highlight{background: #263238;}
+
+.retira_sublinhado{border: 1px solid black}
+
+img + em {
+	margin-top: 6px;
+    font-style: normal;
+    display: inherit;
+    text-align: center;
+    font-size: 75%;
+}
+
+/*p img{border: 1px solid #a0a0a0;}*/
+
+@charset "utf-8";
+
+@import "minimal-mistakes/skins/{{ site.minimal_mistakes_skin | default: 'default' }}"; // skin
+@import "minimal-mistakes"; // main partials
