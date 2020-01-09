@@ -21,6 +21,10 @@
 <lastmod>2020-01-08T00:00:00-03:00</lastmod>
 </url>
 <url>
+<loc>http://localhost:4000/modelos-lineares-de-classificacao-e-pocket/</loc>
+<lastmod>2020-01-09T00:00:00-03:00</lastmod>
+</url>
+<url>
 <loc>http://localhost:4000/busca/</loc>
 </url>
 <url>
@@ -31,5 +35,8 @@
 </url>
 <url>
 <loc>http://localhost:4000/sobre/</loc>
+</url>
+<url>
+<loc>http://localhost:4000/page2/</loc>
 </url>
 </urlset>
