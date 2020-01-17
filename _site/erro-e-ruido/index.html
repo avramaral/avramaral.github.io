@@ -9,27 +9,29 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>  Blog do André</title>
-<meta name="description" content="Site pessoal.">
+<!-- begin _includes/seo.html --><title>[Parte 07] Erro e Ruído - Blog do André</title>
+<meta name="description" content="Formalizando alguns conceitos sobre os quais já falamos ao longo dessa série de textos, essa postagem será dedicada à discussão de: 1) Como quantificar o quão bem a hipótese final $g \in \mathcal{H}$ se aproxima da função alvo $f$? 2) Como lidar com o “ruído” associado à $f$?">
 
 
   <meta name="author" content="André V. R. Amaral">
 
 
-<meta property="og:type" content="website">
+<meta property="og:type" content="article">
 <meta property="og:locale" content="pt_BR">
 <meta property="og:site_name" content="Blog do André">
-<meta property="og:title" content="Blog do André">
-<meta property="og:url" content="http://localhost:4000/">
+<meta property="og:title" content="[Parte 07] Erro e Ruído">
+<meta property="og:url" content="http://localhost:4000/erro-e-ruido/">
 
 
-  <meta property="og:description" content="Site pessoal.">
-
-
-
+  <meta property="og:description" content="Formalizando alguns conceitos sobre os quais já falamos ao longo dessa série de textos, essa postagem será dedicada à discussão de: 1) Como quantificar o quão bem a hipótese final $g \in \mathcal{H}$ se aproxima da função alvo $f$? 2) Como lidar com o “ruído” associado à $f$?">
 
 
 
+
+
+
+
+  <meta property="article:published_time" content="2020-01-17T00:00:00-03:00">
 
 
 
@@ -40,11 +42,9 @@
   
 
 
-<link rel="canonical" href="http://localhost:4000/">
+<link rel="canonical" href="http://localhost:4000/erro-e-ruido/">
 
 
-
-  <link rel="next" href="http://localhost:4000/page2/">
 
 
 <script type="application/ld+json">
@@ -115,7 +115,7 @@
     
   </head>
 
-  <body class="layout--home wide">
+  <body class="layout--single wide">
     <nav class="skip-links">
   <h2 class="screen-reader-text">Skip links</h2>
   <ul>
@@ -288,30 +288,19 @@
   </div>
 
 
-  <div class="archive">
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="[Parte 07] Erro e Ruído">
+    <meta itemprop="description" content="Formalizando alguns conceitos sobre os quais já falamos ao longo dessa série de textos, essa postagem será dedicada à discussão de: 1) Como quantificar o quão bem a hipótese final $g \in \mathcal{H}$ se aproxima da função alvo $f$? 2) Como lidar com o “ruído” associado à $f$?">
+    <meta itemprop="datePublished" content="January 17, 2020">
     
-      <h1 id="page-title" class="page__title"></h1>
-    
-    
 
-<h3 class="archive__subtitle">Publicações recentes</h3>
-
-
-  
-
-
-
-<div class="list__item">
-  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
-    
-    <h2 class="archive__item-title" itemprop="headline">
+    <div class="page__inner-wrap">
       
-        <a href="/erro-e-ruido/" rel="permalink">[Parte 07] Erro e Ruído
-</a>
-      
-    </h2>
-    
-      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">[Parte 07] Erro e Ruído
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
 
 
 
@@ -319,18 +308,106 @@
   5 minuto(s) de leitura
 
 </p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Formalizando alguns conceitos sobre os quais já falamos ao longo <a href="/categorias/#machine-learning-learning-from-data">dessa série de textos</a>, essa postagem será dedicada à discussão de: 1) Como quantificar o quão bem a hipótese final $g \in \mathcal{H}$ se aproxima da função alvo $f$? 2) Como lidar com o “ruído” associado à $f$?</p>
+
+<h3 id="medidas-de-erro">Medidas de Erro</h3>
+
+<p>Dando sequência às ideias sobre as quais começamos a discutir na <a href="/memorizar-nao-e-aprender/">parte 03</a>, e relembrando que $g$ é apenas uma aproximação de $f$, é importante que sejamos capazes de definir uma medida de erro para essa diferença. Vamos, então, começar por definir “erro” da seguinte forma:</p>
+
+<script type="math/tex; mode=display">\begin{align*}
+\text{Erro} = E(h, f).
+\end{align*}</script>
+
+<p>Aqui, note que o erro é uma função de cada uma das possíveis $h \in \mathcal{H}$ e de $f$. Mais explicitamente, dado um ponto $\mathbf{x}$, podemos definir $e(h(\mathbf{x}), f(\mathbf{x}))$ como uma medida pontual de erro. Assim, $E$ será determinado pela média dos erros pontuais $e$’s, para todo $\mathbf{x} \in \mathcal{D}$.</p>
+
+<p>Nesse sentido, temos como exemplo: ${}^{*)}$ $e(h(\mathbf{x}), f(\mathbf{x})) = \mathbb{I}_{\lbrace h(\mathbf{x}) \neq f(\mathbf{x}) \rbrace}$, quando falamos de classificadores; ou ${}^{**)}$ $e(h(\mathbf{x}), f(\mathbf{x})) = (h(\mathbf{x}) - f(\mathbf{x}))^2$, quando estudamos o modelo de regressão.</p>
+
+<p>Um ponto importante a se discutir é que, em uma situação ideal, a medida de erro ($E$) deve ser escolhida de acordo com o problema com o qual se está trabalhando. Entretanto, isso nem sempre é praticável $-$ pode acontecer de a função erro (ou “função custo”, ou “função perda”) especificada ser de difícil otimização (no sentido matemático da palavra; i.e., pode não ser possível determinar o vetor de pesos $\mathbf{w}$ que minimiza essa medida).</p>
+
+<h3 id="ruído">Ruído</h3>
+
+<p>Em situações reais, é possível que não sejamos capazes de obter toda a informação que determina unicamente, através da função $f$, o valor do ponto $\mathbf{x} \in \mathcal{X}$; ou seja, existem características que não são observáveis, e, portanto, não podem ser <strong>explicitamante</strong> incluídas no modelo que escrevemos. Assim, temos que acomodar no nosso <em>framework</em> essa diferença, denomimanda por <strong>ruído</strong>, entre os valores observado e real (não observável) de $y$.</p>
+
+<p>Assim, ao invés de definirmos $y = f(\mathbf{x})$, podemos enxergar $y$ como variável aleatória. Formalmente, ao invés de uma função alvo $f$, teremos uma distribuição alvo $P(y \mid \mathbf{x})$. Dessa forma, um ponto ($\mathbf{x}$, y) é gerado a partir da distribuição conjunta $P(\mathbf{x}, y) = P(\mathbf{x}) P(y \mid \mathbf{x})$. Seguindo esse raciocínio, teremos que $y = f(\mathbf{x}) + \epsilon$; onde, para o modelo de regressão, $f(\mathbf{x}) = \mathbb{E}(y \mid \mathbf{x})$. Aqui, chamaremos de $\epsilon$ de “ruído”, mas existem outros nomes que podem ser encontrados na literatura (“erro”, por exemplo).</p>
+
+<p>O esquema abaixo introduz essa nova compomente $-$ distribuição alvo $-$, bem como a medida de erro (discutida no começo do texto) no diagrama de aprendizado que estamos construindo.</p>
+
+<p><img src="/assets/images/erro-e-ruido_files/framework-completo-aprendizado.png" alt="Framework completo de aprendizado" />
+<em>Figura 1 [fonte: “<a href="http://www.work.caltech.edu/textbook.html">Learning from Data</a>”] $-$ Framework completo de aprendizado.</em></p>
+
+<h3 id="observações-importantes">Observações importantes</h3>
+
+<p>Note que existe uma diferença no papel das distribuição $P(y \mid \mathbf{x})$ e $P(\mathbf{x})$ em relação ao problema do aprendizado que temos discutido até agora. A primeira distruição é a que estamos tentanto aprender, ao passo que a segunda diz respeito à quantificação do quão bem estamos aprendendo (como explicado em detalhes na <a href="/memorizar-nao-e-aprender/">parte 03</a>).</p>
+
+<p>Por fim, podemos nos perguntar se aprender a distribuição alvo é tão fácil quanto aprender a função alvo. E a resposta é: “não necessariamente”. Perceba que a aproximação de $E_{out}$ por $E_{in}$ ainda pode ser igual para os dois cenário (a construção que fizemos na <a href="/memorizar-nao-e-aprender/">parte 03</a> continua válida); entretanto, o erro amostral ($E_{in}$) pode ser potencialmente maior $-$ pela dificuldade de incorporar o ruído no modelo ajustado.</p>
+
+<h2 id="conclusão">Conclusão</h2>
+
+<p>Nesse post, discutimos com um pouco mais de profundidade a quantificação que podemos fazer sobre o quão bem uma função $g \in \mathcal{H}$ pode aproximar $f$; além de como medidas de erro podem ser definidas nesse contexto. Em adição, incorporamos o conceito de <strong>ruído</strong> ao nosso <em>framework</em> de aprendizado, nos permitindo incluir no nosso modelo a diferença entre os valores observado e real (não observável) da variável dependente. Nos próximos textos, vamos generalizar vários dos conceitos que estudamos até agora.</p>
+
+<p>Qualquer dúvida, sugestão ou <em>feedback</em>, por favor, deixe um comentário abaixo.</p>
+
+<blockquote>
+  <p>Essa postagem faz parte de uma <a href="/categorias/#machine-learning-learning-from-data">série</a> de textos que tem o objetivo de estudar, principalmente, o curso “<a href="http://www.work.caltech.edu/telecourse.html">Learning from Data</a>”, ministrado pelo Professor Yaser Abu-Mostafa. Outros materiais utilizados serão sempre referenciados.</p>
+</blockquote>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Atualizado em:</strong> <time datetime="2020-01-17T00:00:00-03:00">January 17, 2020</time></p>
+        
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
     
-    <p class="archive__item-excerpt" itemprop="description">Formalizando alguns conceitos sobre os quais já falamos ao longo dessa série de textos, essa postagem será dedicada à discussão de: 1) Como quantificar o quão bem a hipótese final $g \in \mathcal{H}$ se aproxima da função alvo $f$? 2) Como lidar com o “ruído” associado à $f$?
-</p>
-  </article>
+      <a href="/transformacoes-nao-lineares/" class="pagination--pager" title="[Parte 06] Transformações NÃO-lineares &amp; Implementação em Python
+">Anterior</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Próxima</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Deixe um comentário</h4>
+      <section id="disqus_thread"></section>
+    
 </div>
 
+    
+  </article>
 
   
+  
+    <div class="page__related">
+      <h4 class="page__related-title">Talvez você também goste</h4>
+      <div class="grid__wrapper">
+        
+          
 
 
 
-<div class="list__item">
+<div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
     <h2 class="archive__item-title" itemprop="headline">
@@ -353,12 +430,12 @@
   </article>
 </div>
 
+        
+          
 
-  
 
 
-
-<div class="list__item">
+<div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
     <h2 class="archive__item-title" itemprop="headline">
@@ -381,12 +458,12 @@
   </article>
 </div>
 
+        
+          
 
-  
 
 
-
-<div class="list__item">
+<div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
     <h2 class="archive__item-title" itemprop="headline">
@@ -409,12 +486,12 @@
   </article>
 </div>
 
+        
+          
 
-  
 
 
-
-<div class="list__item">
+<div class="grid__item">
   <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
     
     <h2 class="archive__item-title" itemprop="headline">
@@ -437,49 +514,13 @@
   </article>
 </div>
 
-
-
-
-<nav class="pagination">
+        
+      </div>
+    </div>
   
-  <ul>
-    
-    
-    <li><a href="#" class="disabled"><span aria-hidden="true">Anterior</span></a></li>
-    
-
-    
-    
-      <li><a href="#" class="disabled current">1</a></li>
-    
-
-    
-    
-
-    
-    
-    
-
-    
-
-    
-    
-
-    
-      <li><a href="/page2/">2</a></li>
-    
-
-    
-    
-      <li><a href="/page2/">Próxima</a></li>
-    
-  </ul>
-</nav>
-
-
-
-  </div>
+  
 </div>
+
     </div>
 
     
@@ -532,6 +573,25 @@
 
 
 
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "http://localhost:4000/erro-e-ruido/";  // Replace PAGE_URL with your page's canonical URL variable
+      this.page.identifier = "/erro-e-ruido"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-do-andre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
 
 
 
