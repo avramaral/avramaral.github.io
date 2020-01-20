@@ -1,4 +1,89 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-01-17T13:03:46-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Blog do André</title><subtitle>Site pessoal.</subtitle><author><name>André V. R. Amaral</name></author><entry><title type="html">[Parte 07] Erro e Ruído</title><link href="http://localhost:4000/erro-e-ruido/" rel="alternate" type="text/html" title="[Parte 07] Erro e Ruído" /><published>2020-01-17T00:00:00-03:00</published><updated>2020-01-17T00:00:00-03:00</updated><id>http://localhost:4000/erro-e-ruido</id><content type="html" xml:base="http://localhost:4000/erro-e-ruido/">&lt;p&gt;Formalizando alguns conceitos sobre os quais já falamos ao longo &lt;a href=&quot;/categorias/#machine-learning-learning-from-data&quot;&gt;dessa série de textos&lt;/a&gt;, essa postagem será dedicada à discussão de: 1) Como quantificar o quão bem a hipótese final $g \in \mathcal{H}$ se aproxima da função alvo $f$? 2) Como lidar com o “ruído” associado à $f$?&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-01-20T10:38:43-03:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Blog do André</title><subtitle>Site pessoal.</subtitle><author><name>André V. R. Amaral</name></author><entry><title type="html">[Parte 08] Teoria da Generalização</title><link href="http://localhost:4000/teoria-da-generalizacao/" rel="alternate" type="text/html" title="[Parte 08] Teoria da Generalização" /><published>2020-01-20T00:00:00-03:00</published><updated>2020-01-20T00:00:00-03:00</updated><id>http://localhost:4000/teoria-da-generalizacao</id><content type="html" xml:base="http://localhost:4000/teoria-da-generalizacao/">&lt;p&gt;Ao longo dessa e da próxima postagem da nossa &lt;a href=&quot;/categorias/#machine-learning-learning-from-data&quot;&gt;série de textos&lt;/a&gt;, vamos estabelecer e estudar a distinção que tem que existir entre o conjunto de dados utilizados para treinar o nosso modelo, e o conjunto de dados utilizado para testá-lo.&lt;/p&gt;
+
+&lt;p&gt;Nesse sentido, e considerando medidas de erro, o termo &lt;script type=&quot;math/tex&quot;&gt;E_{out}&lt;/script&gt; nos diz o quão bem o nosso modelo ajustado, baseado em &lt;script type=&quot;math/tex&quot;&gt;\mathcal{D}&lt;/script&gt;, generalizou o comportamento da função alvo (ou distribuição alvo) fora desse conjunto de dados &lt;script type=&quot;math/tex&quot;&gt;(\mathbf{x}_1, y_1), \cdots, (\mathbf{x}_n, y_n)&lt;/script&gt; &lt;script type=&quot;math/tex&quot;&gt;-&lt;/script&gt; ou seja, a medida &lt;script type=&quot;math/tex&quot;&gt;E_{out}&lt;/script&gt; é definida por pontos &lt;script type=&quot;math/tex&quot;&gt;\mathbf{x} \not\in \mathcal{D}&lt;/script&gt;. Em contrapartida, o erro &lt;script type=&quot;math/tex&quot;&gt;E_{in}&lt;/script&gt; baseia-se nos dados de treinamento (conjunto &lt;script type=&quot;math/tex&quot;&gt;\mathcal{D}&lt;/script&gt;). Além disso, como começamos a discutir na &lt;a href=&quot;/memorizar-nao-e-aprender/&quot;&gt;parte 03&lt;/a&gt;, a relação entre &lt;script type=&quot;math/tex&quot;&gt;E_{in}&lt;/script&gt; e &lt;script type=&quot;math/tex&quot;&gt;E_{out}&lt;/script&gt; &lt;script type=&quot;math/tex&quot;&gt;-&lt;/script&gt; dado um conjunto de hipóteses &lt;script type=&quot;math/tex&quot;&gt;\mathcal{H}&lt;/script&gt; de tamanho &lt;script type=&quot;math/tex&quot;&gt;M&lt;/script&gt; &lt;script type=&quot;math/tex&quot;&gt;-&lt;/script&gt;, é definida por:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\begin{align*}
+\mathbb{P}(\lvert E_{in}(g) - E_{out}(g) \rvert &gt; \epsilon) \leq 2 M e^{-2 \epsilon^2 N}.
+\end{align*}&lt;/script&gt;
+
+&lt;p&gt;Veja que a inequação acima torna-se pouco útil quando consideramos um conjunto $\mathcal{H}$ de tamanho infinito (que é o que acontece na maior parte dos casos). Lembre-se também de que essa cota foi obtida pela propriedade de &lt;em&gt;union bound&lt;/em&gt; para a união dos eventos $\left[ \lvert E_{in}(h_m) - E_{out}(h_m) \rvert &amp;gt; \epsilon \right]$, com $m = 1, \cdots, M$. Entretanto, se existir grande interseção entre esses eventos (que é o que acontece), essa cota não é boa $-$ vamos, dessa forma, tentar melhorá-la.&lt;/p&gt;
+
+&lt;p&gt;Para alcançar um objetivo como esse, vamos, primeiro, definir uma nova quantidade: a &lt;strong&gt;função de crescimento&lt;/strong&gt;. Essa função é o que substituirá $M$ na nossa cota. A sequência de observações e definições a seguir nos levará onde queremos chegar.&lt;/p&gt;
+
+&lt;p&gt;Agora, ao invés de tomarmos $h: \mathcal{X} \longrightarrow \lbrace -1, +1 \rbrace$ (para simplificar os argumentos, iremos considerar funções avaliadas no conjunto $\lbrace -1, +1 \rbrace$, ao invés de $\mathbb{R}$), vamos restringir o domínio da função aos pontos de $\mathcal{D}$; i.e., $h: \lbrace \mathbf{x}_1, \cdots, \mathbf{x}_N \rbrace \longrightarrow \lbrace -1, +1 \rbrace$. Assim, se $h$ for avaliada em uma amostra finita $\lbrace \mathbf{x}_1, \cdots, \mathbf{x}_N \rbrace \subset \mathcal{X}$, iremos obter um $N$-upla $(h(\mathbf{x}_1), \cdots, h(\mathbf{x}_N))$ de $\pm 1 $’s.Essa “nova” função $h$ será chamada de &lt;strong&gt;dicotomia&lt;/strong&gt;.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Definição 1:&lt;/strong&gt; Tome $\lbrace \mathbf{x}_1, \cdots, \mathbf{x}_N \rbrace \subset \mathcal{X}$. As dicotomias geradas por $\mathcal{H}$ sobre esse conjunto de pontos serão definida por:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\begin{align*}
+\mathcal{H}(\mathbf{x}_1, \cdots, \mathbf{x}_N) = \lbrace (h(\mathbf{x}_1), \cdots, h(\mathbf{x}_N)) \mid h \in \mathcal{H} \rbrace
+\end{align*}&lt;/script&gt;
+
+&lt;p&gt;&lt;strong&gt;Definição 2&lt;/strong&gt;: A &lt;strong&gt;função de crescimento&lt;/strong&gt; é definida, para um conjunto $\mathcal{H}$, como:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\begin{align*}
+m_{\mathcal{H}}(N) = \max_{\lbrace \mathbf{x}_1, \cdots, \mathbf{x}_N \rbrace \subset \mathcal{X}} \lvert \mathcal{H}(\mathbf{x}_1, \cdots, \mathbf{x}_N) \rvert
+\end{align*},&lt;/script&gt;
+
+&lt;p&gt;onde $\lvert \cdot \rvert$ é a cardinalidade do conjunto.&lt;/p&gt;
+
+&lt;p&gt;Em palavras, &lt;script type=&quot;math/tex&quot;&gt;m_{\mathcal{H}}(N)&lt;/script&gt; é número máximo de dicotomias que podem ser geradas por &lt;script type=&quot;math/tex&quot;&gt;\mathcal{H}&lt;/script&gt; a partir de um conjunto de &lt;script type=&quot;math/tex&quot;&gt;N&lt;/script&gt; pontos. Aqui, note que, como os elementos de &lt;script type=&quot;math/tex&quot;&gt;\mathcal{H}(\mathbf{x}_1, \cdots, \mathbf{x}_N)&lt;/script&gt; são subconjuntos de &lt;script type=&quot;math/tex&quot;&gt;\lbrace -1, +1 \rbrace^N&lt;/script&gt;, então &lt;script type=&quot;math/tex&quot;&gt;m_{\mathcal{H}}(N) \leq 2^N&lt;/script&gt;. Além disso, se &lt;script type=&quot;math/tex&quot;&gt;\mathcal{H}&lt;/script&gt; for capaz de gerar todas as possíveis dicotomias sobre &lt;script type=&quot;math/tex&quot;&gt;\lbrace \mathbf{x}_1, \cdots, \mathbf{x}_N \rbrace&lt;/script&gt;, então &lt;script type=&quot;math/tex&quot;&gt;\mathcal{H}(\mathbf{x}_1, \cdots, \mathbf{x}_N) = \lbrace -1, +1 \rbrace^N&lt;/script&gt; e nós dizemos que &lt;script type=&quot;math/tex&quot;&gt;\mathcal{H}&lt;/script&gt; pode &lt;em&gt;quebrar&lt;/em&gt; &lt;script type=&quot;math/tex&quot;&gt;\lbrace \mathbf{x}_1, \cdots, \mathbf{x}_N \rbrace&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;Para entendermos melhor os conceitos que acabamos de definir, considere $\mathcal{H}$ como sendo o conjunto de hipóteses associado ao algoritmo Perceptron avaliado em duas dimensões. A partir da figura abaixo, podemos dizer que:&lt;/p&gt;
+
+&lt;p&gt;&lt;img src=&quot;/assets/images/teoria-da-generalizacao_files/perceptron-possibilidades.png&quot; alt=&quot;Learning from Data&quot; /&gt;
+&lt;em&gt;Figura 1 [adaptado de: “&lt;a href=&quot;http://www.work.caltech.edu/textbook.html&quot;&gt;Learning from Data&lt;/a&gt;”] $-$ Análise da função de crescimento para o Perceptron.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Olhando para &lt;script type=&quot;math/tex&quot;&gt;{}^{(a)}&lt;/script&gt;, onde os pontos &lt;script type=&quot;math/tex&quot;&gt;\mathbf{x}_1, \mathbf{x}_2&lt;/script&gt; e &lt;script type=&quot;math/tex&quot;&gt;\mathbf{x}_3&lt;/script&gt; foram dispostos de maneira colinear, observe que não conseguimos, utilizando o Perceptron, obter todas as oito &lt;script type=&quot;math/tex&quot;&gt;3&lt;/script&gt;-uplas; entretanto, considerando &lt;script type=&quot;math/tex&quot;&gt;{}^{(b)}&lt;/script&gt;, isso é possível, logo &lt;script type=&quot;math/tex&quot;&gt;m_{\mathcal{H}}(3) = 8&lt;/script&gt;. Por outro lado, para &lt;script type=&quot;math/tex&quot;&gt;N = 4&lt;/script&gt;, somente catorze das possíveis dezesseis &lt;script type=&quot;math/tex&quot;&gt;4&lt;/script&gt;-uplas podem ser geradas pelo Perceptron &lt;script type=&quot;math/tex&quot;&gt;-&lt;/script&gt; assim, &lt;script type=&quot;math/tex&quot;&gt;m_{\mathcal{H}}(4) = 14&lt;/script&gt;.&lt;/p&gt;
+
+&lt;p&gt;Veja, nesse caso, que não é fácil calcular, como função de $N$, a quantidade $m_{\mathcal{H}}(N)$. Observe ainda que, se considerarmos diferentes conjuntos $\mathcal{H}$, associados a diferentes algorimos, essa diculdade pode ser ainda maior. Felizmente, para conseguirmos o que estamos querendo, basta que sejamos capazes de determinar uma cota superior “boa” (veremos a seguir, o que quero dizer por “boa”) para $m_{\mathcal{H}}(N)$. Mas antes disso, mais uma definição:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Definição 3:&lt;/strong&gt; se nenhum conjunto de pontos de tamanho $k$ puder ser &lt;em&gt;quebrado&lt;/em&gt; (de acordo com a definição que demos ao termo “quebrar”) por $\mathcal{H}$, então $k$ é chamado de &lt;strong&gt;&lt;em&gt;break point&lt;/em&gt;&lt;/strong&gt; para $\mathcal{H}$.&lt;/p&gt;
+
+&lt;p&gt;A partir da Def. 3, é fácil notar que se $\mathcal{H}$ é a classe de funções associada ao algoritmo Perceptron em duas dimensões, então $k = 4$ é &lt;em&gt;break point&lt;/em&gt; para $\mathcal{H}$.&lt;/p&gt;
+
+&lt;p&gt;A Def.3 também é fundamental para conseguirmos a cota “boa” que gostaríamos de ter para $m_{\mathcal{H}}(N)$. Veja o teorema a seguir:&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Teorema 1:&lt;/strong&gt; Se $m_{\mathcal{H}}(N) &amp;lt; 2^k$ para algum valor de $k$; isto é, se existe &lt;em&gt;break point&lt;/em&gt;  $k$ para $\mathcal{H}$, então&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\begin{align*}
+m_{\mathcal{H}}(N) \leq \sum_{i = 0}^{k - 1} {N \choose i}
+\end{align*}&lt;/script&gt;
+
+&lt;p&gt;para todo $N$. &lt;strong&gt;Observação:&lt;/strong&gt; aqui, o lado direito da inequação é um polinômio em $N$ de grau $k - 1$.&lt;/p&gt;
+
+&lt;p&gt;&lt;em&gt;A demonstração do Teorema 1 pode ser encontrada no Capítulo 2 de &lt;a href=&quot;http://www.work.caltech.edu/textbook.html&quot;&gt;Learning from Data&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;Observe que um cota como a estabelecida pelo Teor. 1 é &lt;strong&gt;boa&lt;/strong&gt;, pois, se pudermos substituir $M$ por $m_{\mathcal{H}}(N)$ em $\mathbb{P}(\lvert E_{in}(g) - E_{out}(g) \rvert &amp;gt; \epsilon) \leq 2 M e^{-2 \epsilon^2 N}$, então:&lt;/p&gt;
+
+&lt;ol&gt;
+  &lt;li&gt;$m_{\mathcal{H}}(N)$ será dominada por alguma coisa que cresce polinomiamente rápido com $N$.&lt;/li&gt;
+  &lt;li&gt;$e^{-2 \epsilon^2 N}$ decresce exponecialmente rápido com $N$.&lt;/li&gt;
+  &lt;li&gt;Logo $\mathbb{P}(\lvert E_{in}(g) - E_{out}(g) \rvert &amp;gt; \epsilon)$  será menor ou igual que alguma quantidade arbitrariamente próxima de zero, como gostaríamos que fosse.&lt;/li&gt;
+&lt;/ol&gt;
+
+&lt;h3 id=&quot;desigualdade-de-vapnik-chervonenkis&quot;&gt;Desigualdade de Vapnik-Chervonenkis&lt;/h3&gt;
+
+&lt;p&gt;Finalmente, o último passo que queremos conseguir justificar é o da troca de $M$ por $m_{\mathcal{H}}(N)$. Se isso for possível, resolvemos nosso problema. Esse resultado (a menos de troca de constantes) é conhecido como Desigualdade de Vapnik-Chervonenkis e é enunciado a seguir.&lt;/p&gt;
+
+&lt;p&gt;&lt;strong&gt;Teorema 2 (Desigualdade de Vapnik-Chervonenkis):&lt;/strong&gt; Para qualquer $N \in \mathbb{N}$, vale:&lt;/p&gt;
+
+&lt;script type=&quot;math/tex; mode=display&quot;&gt;\begin{align*}
+\mathbb{P}\left[ \lvert E_{in}(g) - E_{out}(g) \rvert &gt; \epsilon \right] \leq 4 \cdot m_{\mathcal{H}}(2N) \cdot e^{-\frac{1}{8} \epsilon^2 N} \text{, } \forall \epsilon &gt; 0.
+\end{align*}&lt;/script&gt;
+
+&lt;p&gt;&lt;em&gt;A demonstração do Teorema 2 pode ser encontrada no Apêndice A de &lt;a href=&quot;http://www.work.caltech.edu/textbook.html&quot;&gt;Learning from Data&lt;/a&gt;.&lt;/em&gt;&lt;/p&gt;
+
+&lt;p&gt;No Teor. 2, perceba que as constantes que foram alteradas, em comparação à Desigualdade de Hoeffding, &lt;strong&gt;não&lt;/strong&gt; “jogam ao nosso favor”. Porém, para $N$ suficientemente grande, o lado direito da desigualdade ainda é arbitrariamente pequeno.&lt;/p&gt;
+
+&lt;h2 id=&quot;conclusão&quot;&gt;Conclusão&lt;/h2&gt;
+
+&lt;p&gt;Como já foi estabelecido desde a &lt;a href=&quot;/memorizar-nao-e-aprender/&quot;&gt;parte 03&lt;/a&gt;, nosso interesse é argumentar que o erro $E_{out}$ (construído a partir de $\mathcal{X} - \mathcal{D}$) é bem aproximado por $E_{in}$ (construído a partir de $\mathcal{D}$). Havíamos resolvido essa questão quando o tamanho de $\mathcal{H}$ é finito; porém, do ponto de vista prático, esse quase nunca é o caso. Assim, se pudermos construir uma cota (como na Desigualdade de Hoeffding) que depende de $m_{\mathcal{H}}(N)$ ao invés de $M$, conseguimos generalizar adequamente a ideia de que é possível que o nosso modelo, a partir de um conjunto de hipóteses $\mathcal{H}$ com cardinalidade (potencialmente) infinita, aprenda. Felizmente, a desigualdade de Vapnik-Chervonenkis estabelece essa relação e resolve esse problema.&lt;/p&gt;
+
+&lt;p&gt;Qualquer dúvida, sugestão ou &lt;em&gt;feedback&lt;/em&gt;, por favor, deixe um comentário abaixo.&lt;/p&gt;
+
+&lt;blockquote&gt;
+  &lt;p&gt;Essa postagem faz parte de uma &lt;a href=&quot;/categorias/#machine-learning-learning-from-data&quot;&gt;série&lt;/a&gt; de textos que tem o objetivo de estudar, principalmente, o curso “&lt;a href=&quot;http://www.work.caltech.edu/telecourse.html&quot;&gt;Learning from Data&lt;/a&gt;”, ministrado pelo Professor Yaser Abu-Mostafa. Outros materiais utilizados serão sempre referenciados.&lt;/p&gt;
+&lt;/blockquote&gt;</content><author><name>André V. R. Amaral</name></author><summary type="html">Ao longo dessa e da próxima postagem da nossa série de textos, vamos estabelecer e estudar a distinção que tem que existir entre o conjunto de dados utilizados para treinar o nosso modelo, e o conjunto de dados utilizado para testá-lo.</summary></entry><entry><title type="html">[Parte 07] Erro e Ruído</title><link href="http://localhost:4000/erro-e-ruido/" rel="alternate" type="text/html" title="[Parte 07] Erro e Ruído" /><published>2020-01-17T00:00:00-03:00</published><updated>2020-01-17T00:00:00-03:00</updated><id>http://localhost:4000/erro-e-ruido</id><content type="html" xml:base="http://localhost:4000/erro-e-ruido/">&lt;p&gt;Formalizando alguns conceitos sobre os quais já falamos ao longo &lt;a href=&quot;/categorias/#machine-learning-learning-from-data&quot;&gt;dessa série de textos&lt;/a&gt;, essa postagem será dedicada à discussão de: 1) Como quantificar o quão bem a hipótese final $g \in \mathcal{H}$ se aproxima da função alvo $f$? 2) Como lidar com o “ruído” associado à $f$?&lt;/p&gt;
 
 &lt;h3 id=&quot;medidas-de-erro&quot;&gt;Medidas de Erro&lt;/h3&gt;
 
