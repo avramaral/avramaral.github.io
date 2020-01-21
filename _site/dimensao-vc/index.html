@@ -1,0 +1,668 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.17.2 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="pt" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>[Parte 09] Dimensão de Vapnik-Chervonenkis - Blog do André</title>
+<meta name="description" content="Continuando a discussão que começamos na última parte da nossa série de textos, vamos estudar mais propriedades associadas ao que demos o nome de “Teoria da Generalização”; ou, em outras palavras, ao estudo de como os nossos modelos podem ser generalizados para conjuntos de dados fora de $\mathcal{D}$.">
+
+
+  <meta name="author" content="André V. R. Amaral">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Blog do André">
+<meta property="og:title" content="[Parte 09] Dimensão de Vapnik-Chervonenkis">
+<meta property="og:url" content="http://localhost:4000/dimensao-vc/">
+
+
+  <meta property="og:description" content="Continuando a discussão que começamos na última parte da nossa série de textos, vamos estudar mais propriedades associadas ao que demos o nome de “Teoria da Generalização”; ou, em outras palavras, ao estudo de como os nossos modelos podem ser generalizados para conjuntos de dados fora de $\mathcal{D}$.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2020-01-21T00:00:00-03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/dimensao-vc/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "André",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Blog do André Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<link rel="shortcut icon" href="../../assets/images/favicon.ico" type="image/x-icon">
+
+<!-- end custom head snippets -->
+
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+          processEscapes: true
+        }
+      });
+    </script>
+    
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          Blog do André
+          <span class="site-subtitle">Probabilidade, estatística e mais.</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/categorias/" >Categorias</a>
+            </li><li class="masthead__menu-item">
+              <a href="/busca/" >Busca</a>
+            </li></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+
+      
+        <img src="/assets/images/profile_picture.jpeg" alt="André V. R. Amaral" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">André V. R. Amaral</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Mestrando em Estatística pela <a href="http://www.est.ufmg.br/portal/">Universidade Federal de Minas Gerais</a>.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Informações</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+            <li><a href="/sobre/" rel="nofollow noopener noreferrer"><i class="far fa-fw fa-question-circle" aria-hidden="true"></i> Sobre</a></li>
+          
+        
+          
+            <li><a href="mailto:avramaral@gmail.com" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i> E-mail</a></li>
+          
+        
+          
+            <li><a href="https://github.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+          
+        
+          
+            <li><a href="https://twitter.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i> Twitter</a></li>
+          
+        
+          
+            <li><a href="https://www.linkedin.com/in/andre-victor-ribeiro-amaral/" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin-in" aria-hidden="true"></i> LinkedIn</a></li>
+          
+        
+          
+            <li><a href="https://www.youtube.com/channel/UC5RVscKF68DWYixtJPrBccQ" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-youtube" aria-hidden="true"></i> YouTube</a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="[Parte 09] Dimensão de Vapnik-Chervonenkis">
+    <meta itemprop="description" content="Continuando a discussão que começamos na última parte da nossa série de textos, vamos estudar mais propriedades associadas ao que demos o nome de “Teoria da Generalização”; ou, em outras palavras, ao estudo de como os nossos modelos podem ser generalizados para conjuntos de dados fora de $\mathcal{D}$.">
+    <meta itemprop="datePublished" content="January 21, 2020">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">[Parte 09] Dimensão de Vapnik-Chervonenkis
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  9 minuto(s) de leitura
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Continuando a discussão que começamos na <a href="/teoria-da-generalizacao/">última parte</a> da <a href="/categorias/#machine-learning-learning-from-data">nossa série de textos</a>, vamos estudar mais propriedades associadas ao que demos o nome de “Teoria da Generalização”; ou, em outras palavras, ao estudo de como os nossos modelos podem ser generalizados para conjuntos de dados fora de $\mathcal{D}$.</p>
+
+<p>Nesse sentido, a primeira definição que vamos introduzir $-$ e a mais importante do ponto de vista <strong>prático</strong>, é a de Dimensão Vapnik-Chervonenkis (VC).</p>
+
+<p><strong>Definição 1:</strong> a <strong>dimensão VC</strong> de um conjunto $\mathcal{H}$, denotada por $d_{\text{VC}}(\mathcal{H})$ (ou somente $d_{\text{VC}}$), é o maior valor de $N$ para o qual $m_{\mathcal{H}}(N) = 2^N$.</p>
+
+<p>De forma simples, a dimensão VC corresponde ao máximo de pontos $N$ (para <strong>algum</strong> conjunto de pontos) que $\mathcal{H}$ pode <em>quebrar</em> (lembre-se do significado que demos à essa expressão). Além disso, como é fácil perceber, se $d_{\text{VC}}$ é dimensão VC para $\mathcal{H}$, então $k = d_{\text{VC}} + 1$ é <em>break point</em>. Assim, o <strong>Teor. 1 da <a href="/teoria-da-generalizacao/">parte 08</a></strong> pode ser reescrito da seguinte forma:</p>
+
+<script type="math/tex; mode=display">\begin{align*}
+m_{\mathcal{H}(N)} \leq \sum_{i = 0}^{d_{\text{VC}}}{N \choose i},
+\end{align*}</script>
+
+<p>onde o termo do lado direito da inequação é um polinômio de grau $d_{\text{VC}}$; i.e., a dimensão VC também determina o grau do polinômio que limita a função de crescimento.</p>
+
+<p>Uma outra consequência direta dessa nova definição é que conseguimos, sem surpresa, caracterizar o fenômeno $f \approx g$; ou seja, se $d_{\text{VC}}$ é finito, então $g \in \mathcal{H}$ irá generalizar o comportamento de $f$. Em adição, perceba que a dimensão VC é independente de:</p>
+
+<ul>
+  <li>$\mathcal{A}$, o algoritmo de aprendizagem $-$ note que, sob a hipótese de que $d_{\text{VC}}$ é finito, $f$ é generalizada (bem ou mal) por qualquer $h \in \mathcal{H}$.</li>
+  <li>$P$, a distribuição de entrada $-$ nesse caso, perceba que, para a função de crescimento, escolhemos um conjunto de pontos que maximiza o números de dicotomias geradas por $\mathcal{H}$; assim, a escolha da distribuição que determina os pontos de $\mathcal{D}$ não exerce papel fundamental na ideia de “generalização”.</li>
+  <li>$f$, a função alvo $-$ veja que, satisfeita determinadas condições, a Desigualdade de Vapnik-Chervonenkis é válida independente de que função $f$ estamos tentando generalizar.</li>
+</ul>
+
+<p>Agora, utilizando o conceito que acabamos de definir, podemos tentar determinar a dimensão VC para algum conjunto conhecido de hipóteses $\mathcal{H}$. Por exemplo, para o Perceptron $d$-dimensional, temos que $d_{\text{VC}} = d + 1$. A demonstração desse fato não é complicada, e o argumento principal recai sobre o fato de que é possível mostrar que: ${}^{(a)}$ $d_{\text{VC}} \leq d + 1$ e ${}^{(b)}$ $d_{\text{VC}} \geq d + 1$. Entretanto, mais importante do que o resultado em si, é sua interpretação: qual o significado da quantidade $d + 1$ em um modelo Perceptron de $d$ dimensões?</p>
+
+<p>Para o algoritmo Perceptron $d$-dimensional, a quantidade $d + 1$ diz respeito à quantidade de parâmetros necessários para se determinar a hipótese $h \in \mathcal{H}$. Nesse sentido, podemos dizer que, de alguma forma, a dimensão VC é tão maior (ou menor) quanto for o número de <strong>parâmetros efetivos</strong> (aqui, talvez o termo “<strong>graus de liberdade</strong>” seja mais adequado) do modelo com o qual estamos trabalhando.</p>
+
+<p>Além disso, uma outra interpretação da quantidade “dimensão VC” pode ser introduzida $-$ nesse caso, uma interpretação <strong>prática</strong>. Mas antes, vamos relembrar o que a Desigualdade Vapnik-Chervonenkis diz:</p>
+
+<script type="math/tex; mode=display">\begin{align*}
+\mathbb{P}\left[ \lvert E_{in}(g) - E_{out}(g) \rvert > \epsilon \right] \leq \delta,
+\end{align*}</script>
+
+<p>onde $\delta = 4 \cdot m_{\mathcal{H}}(2N) \cdot e^{-\frac{1}{8} \epsilon^2 N}$.</p>
+
+<p>Da equação anterior, podemos nos perguntar: fixados $\delta$ e $\epsilon$, como se relacionam $N$ e $d_{\text{VC}}$? Para tentar responder à essa pergunta, ao invés de olharmos para $\delta$ como definido acima, vamos nos concentrar em analisar $\delta = N^{d_{\text{VC}}} \cdot e^{-N}$ (que é uma simplificação “honesta” do problema que estamos tentando estudar). O gráfico de $\delta(N)$ para diferentes valores de $d_{\text{VC}}$ é apresentado a seguir.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># plot of (N^d * exp{-N}) for different values of "d"
+</span>
+<span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="k">def</span> <span class="nf">my_func</span><span class="p">(</span><span class="n">N</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">((</span><span class="n">N</span> <span class="o">**</span> <span class="n">d</span><span class="p">)</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">N</span><span class="p">))</span>
+
+<span class="n">d_values</span> <span class="o">=</span> <span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="n">num</span> <span class="o">=</span> <span class="mi">100</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">d_values</span><span class="p">:</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">my_func</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s">"d = "</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s">"black"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">"N"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">"Upper bound for the desired probab. (log scale)"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mf">10e-3</span><span class="p">,</span> <span class="mf">10e9</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">yscale</span><span class="p">(</span><span class="s">"log"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/assets/images/dimensao-vc_files/dimensao-vc_9_0.png" alt="png" /></p>
+
+<p>Perceba que a cota superior para a probabilidade deseja também cresce à medida que $d_{\text{VC}}$ cresce. <strong>Observação 1:</strong> apesar de estarmos olhando para uma cota superior de $\mathbb{P}\left[ \lvert E_{in}(g) - E_{out}(g) \rvert &gt; \epsilon \right]$, o comportamento apresentado no gráfico traduz, empiricamente, o comportamento da probabilidade desejada. Assim, se estamos trabalhando com modelos de alta dimensão VC, precisaremos de uma amostra de tamanho proporcionalmente maior $-$ como regra <strong>prática</strong>, utilizaremos $N = 10 \cdot d_{\text{VC}}$.</p>
+
+<h3 id="cota-para-teoria-da-generalização">Cota para Teoria da Generalização</h3>
+
+<p>Por fim, antes de terminar esse texto, vamos trabalhar um pouco com a Desigualdade de Vapnik-Chervonenkis, reescrevendo-a em um formato que nos será mais útil. Dessa forma, se $\delta = 4 \cdot m_{\mathcal{H}}(2N) \cdot e^{-\frac{1}{8} \epsilon^2 N}$, então:</p>
+
+<script type="math/tex; mode=display">\begin{align*}
+\epsilon = \sqrt{\frac{8}{N} \, \ln \left[{\frac{4 \cdot m_{\mathcal{H}}(2N)}{\delta}}\right]} = \Omega(N,\mathcal{H},\delta).
+\end{align*}</script>
+
+<p>Assim, com probabilidade $\geq 1 - \delta$,</p>
+
+<script type="math/tex; mode=display">\begin{align*}
+\lvert E_{in}(g) - E_{out}(g) \rvert \leq \Omega(N,\mathcal{H},\delta) = \Omega.
+\end{align*}</script>
+
+<p>Porém, como o termo $E_{in}$ é (quase sempre) forçadamente menor que $E_{out}$ (lembre-se que, quando ajustamos um modelo, estamos tentando minimiar $E_{in}$), podemos simplificar um pouco mais a nossa notação e escrever que, com probabilidade $\geq 1 - \delta$,</p>
+
+<script type="math/tex; mode=display">\begin{align*}
+E_{out} - E_{in} \leq \Omega.
+\end{align*}</script>
+
+<p>A inequeção que acabamos de escrever é conhecida como uma cota para o “erro generalizado”.</p>
+
+<p>Finalmente, com probabilidade $\geq 1 - \delta$,</p>
+
+<script type="math/tex; mode=display">\begin{align*}
+E_{out} \leq E_{in} + \Omega.
+\end{align*}</script>
+
+<p>Essa forma de reescrever a Desigualdade de Vapnik-Chervonenkis é interessante porque, apesar do termo da esquerda permanecer desconhecido, nós temos algum controle sobre $E_{in}$ e $\Omega$ (o primeiro é o que tentamos minimizar, enquanto que o segundo relaciona-se à escolha de $\mathcal{H}$). <strong>Observação 2:</strong> aqui, note que um conjunto de hipóteses $\mathcal{H}$ “grande” ajuda a minimar $E_{in}$, mas faz com que $\Omega$ cresça (já que, se $\mathcal{H}$ cresce, então $d_{\text{VC}}$ também é potencialmente maior), o que é ruim. Dessa forma, deve existir um balanço sobre o tamanho de $\mathcal{H}$ para minimizar o termo $E_{out}$.</p>
+
+<h2 id="conclusão">Conclusão</h2>
+
+<p>Dando continuidade à <a href="/teoria-da-generalizacao/">parte 08</a>, definimos e estudamos uma nova quantidade: <strong>dimensão VC</strong> ou $d_{\text{VC}}(\mathcal{H})$. Vimos, nesse caso, como o valor de $d_{\text{VC}}$ afeta, do ponto de vista prático, o tamanho de amostra $N$ que temos que ter para minimar a diferença entre $E_{out}$ e $E_{in}$. Por último, rearranjando os termos da Desigualdade de Vapnik-Chervonenkis, fomos capazes de escrever uma cota, como função de $E_{in}$ e de $\Omega(N, \mathcal{H}, \delta)$, para o termo $E_{out}$. No próximo post vamos discutir, principalmente, a questão do <em>tradeoff</em> entre viés e variância.</p>
+
+<p>Qualquer dúvida, sugestão ou <em>feedback</em>, por favor, deixe um comentário abaixo.</p>
+
+<blockquote>
+  <p>Essa postagem faz parte de uma <a href="/categorias/#machine-learning-learning-from-data">série</a> de textos que tem o objetivo de estudar, principalmente, o curso “<a href="http://www.work.caltech.edu/telecourse.html">Learning from Data</a>”, ministrado pelo Professor Yaser Abu-Mostafa. Outros materiais utilizados serão sempre referenciados.</p>
+</blockquote>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Atualizado em:</strong> <time datetime="2020-01-21T00:00:00-03:00">January 21, 2020</time></p>
+        
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/teoria-da-generalizacao/" class="pagination--pager" title="[Parte 08] Teoria da Generalização
+">Anterior</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Próxima</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Deixe um comentário</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">Talvez você também goste</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/teoria-da-generalizacao/" rel="permalink">[Parte 08] Teoria da Generalização
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Ao longo dessa e da próxima postagem da nossa série de textos, vamos estabelecer e estudar a distinção que tem que existir entre o conjunto de dados utilizados para treinar o nosso modelo, e o conjunto de dados utilizado para testá-lo.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/erro-e-ruido/" rel="permalink">[Parte 07] Erro e Ruído
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  5 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Formalizando alguns conceitos sobre os quais já falamos ao longo dessa série de textos, essa postagem será dedicada à discussão de: 1) Como quantificar o quão bem a hipótese final $g \in \mathcal{H}$ se aproxima da função alvo $f$? 2) Como lidar com o “ruído” associado à $f$?
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/transformacoes-nao-lineares/" rel="permalink">[Parte 06] Transformações NÃO-lineares &amp; Implementação em Python
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  15 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Como vimos até agora nessa série de textos, modelos lineares (tanto de classificação quanto de regressão) utilizam a quantidade $\sum_{i = 0}^{d} w_i x_i$ para calcular a função $h \in \mathcal{H}$. Note que essa expressão é linear para os $x_i$’s e $w_i$’s; porém, como discutimos na parte 05, os $x_i$’s podem, do p...</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/modelo-de-regressao-linear/" rel="permalink">[Parte 05] Modelo de Regressão Linear &amp; Implementação em Python
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  11 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Continuando a discussão sobre modelos lineares, assunto que começamos a estudar na parte 04 dessa série de textos, vamos, nesse post, falar do modelo de regressão. A principal diferença entre esse tipo de modelo e os classificadores que estudamos anteriormente é que agora a função alvo $f$ é real-avaliada $-$ que é ...</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Informações:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://github.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/andre-victor-ribeiro-amaral/" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin-in" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+        
+          <li><a href="https://www.youtube.com/channel/UC5RVscKF68DWYixtJPrBccQ" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-youtube" aria-hidden="true"></i> YouTube</a></li>
+        
+      
+    
+
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2020 André. Desenvolvido com <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "http://localhost:4000/dimensao-vc/";  // Replace PAGE_URL with your page's canonical URL variable
+      this.page.identifier = "/dimensao-vc"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-do-andre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+  </body>
+</html>
