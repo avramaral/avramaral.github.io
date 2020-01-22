@@ -1,0 +1,637 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.17.2 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="pt" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>[Parte 10] Trade-off entre Viés-Variância - Blog do André</title>
+<meta name="description" content="Continuando com a discussão, introduzida na parte 09 dessa série de textos, de que deve existir um “meio termo” sobre o tamanho de $\mathcal{H}$ $-$ lembre-se: se $\mathcal{H}$ é muito grande, conseguimos diminuir o termo $E_{in}$; porém, somos penalizados na generalização do modelo para dados fora de $\mathcal{D}$. Em contrapartida, se $\mathcal{H}$ é pequeno, conseguimos, com probabilidade suficientemente alta, que $E_{out} \approx E_{in}$, mas perdemos a capacidade de fazer $E_{in}$ arbitrariamente pequeno $-$, vamos, ao longo dessa postagem, abordar esse problema de um ponto de vista diferente.">
+
+
+  <meta name="author" content="André V. R. Amaral">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Blog do André">
+<meta property="og:title" content="[Parte 10] Trade-off entre Viés-Variância">
+<meta property="og:url" content="http://localhost:4000/vies-variancia-tradeoff/">
+
+
+  <meta property="og:description" content="Continuando com a discussão, introduzida na parte 09 dessa série de textos, de que deve existir um “meio termo” sobre o tamanho de $\mathcal{H}$ $-$ lembre-se: se $\mathcal{H}$ é muito grande, conseguimos diminuir o termo $E_{in}$; porém, somos penalizados na generalização do modelo para dados fora de $\mathcal{D}$. Em contrapartida, se $\mathcal{H}$ é pequeno, conseguimos, com probabilidade suficientemente alta, que $E_{out} \approx E_{in}$, mas perdemos a capacidade de fazer $E_{in}$ arbitrariamente pequeno $-$, vamos, ao longo dessa postagem, abordar esse problema de um ponto de vista diferente.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2020-01-22T00:00:00-03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/vies-variancia-tradeoff/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "André",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Blog do André Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<link rel="shortcut icon" href="../../assets/images/favicon.ico" type="image/x-icon">
+
+<!-- end custom head snippets -->
+
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+          processEscapes: true
+        }
+      });
+    </script>
+    
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          Blog do André
+          <span class="site-subtitle">Probabilidade, estatística e mais.</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/categorias/" >Categorias</a>
+            </li><li class="masthead__menu-item">
+              <a href="/busca/" >Busca</a>
+            </li></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+
+      
+        <img src="/assets/images/profile_picture.jpeg" alt="André V. R. Amaral" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">André V. R. Amaral</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Mestrando em Estatística pela <a href="http://www.est.ufmg.br/portal/">Universidade Federal de Minas Gerais</a>.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Informações</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+            <li><a href="/sobre/" rel="nofollow noopener noreferrer"><i class="far fa-fw fa-question-circle" aria-hidden="true"></i> Sobre</a></li>
+          
+        
+          
+            <li><a href="mailto:avramaral@gmail.com" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i> E-mail</a></li>
+          
+        
+          
+            <li><a href="https://github.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+          
+        
+          
+            <li><a href="https://twitter.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i> Twitter</a></li>
+          
+        
+          
+            <li><a href="https://www.linkedin.com/in/andre-victor-ribeiro-amaral/" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin-in" aria-hidden="true"></i> LinkedIn</a></li>
+          
+        
+          
+            <li><a href="https://www.youtube.com/channel/UC5RVscKF68DWYixtJPrBccQ" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-youtube" aria-hidden="true"></i> YouTube</a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="[Parte 10] Trade-off entre Viés-Variância">
+    <meta itemprop="description" content="Continuando com a discussão, introduzida na parte 09 dessa série de textos, de que deve existir um “meio termo” sobre o tamanho de $\mathcal{H}$ $-$ lembre-se: se $\mathcal{H}$ é muito grande, conseguimos diminuir o termo $E_{in}$; porém, somos penalizados na generalização do modelo para dados fora de $\mathcal{D}$. Em contrapartida, se $\mathcal{H}$ é pequeno, conseguimos, com probabilidade suficientemente alta, que $E_{out} \approx E_{in}$, mas perdemos a capacidade de fazer $E_{in}$ arbitrariamente pequeno $-$, vamos, ao longo dessa postagem, abordar esse problema de um ponto de vista diferente.">
+    <meta itemprop="datePublished" content="January 22, 2020">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">[Parte 10] Trade-off entre Viés-Variância
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  7 minuto(s) de leitura
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Continuando com a discussão, introduzida na <a href="/dimensao-vc/">parte 09</a> <a href="/categorias/#machine-learning-learning-from-data">dessa série de textos</a>, de que deve existir um “meio termo” sobre o tamanho de $\mathcal{H}$ $-$ lembre-se: se $\mathcal{H}$ é muito grande, conseguimos diminuir o termo $E_{in}$; porém, somos penalizados na generalização do modelo para dados fora de $\mathcal{D}$. Em contrapartida, se $\mathcal{H}$ é pequeno, conseguimos, com probabilidade suficientemente alta, que $E_{out} \approx E_{in}$, mas perdemos a capacidade de fazer $E_{in}$ arbitrariamente pequeno $-$, vamos, ao longo dessa postagem, abordar esse problema de um ponto de vista diferente.</p>
+
+<p>Ao invés de cotar (por cima) o termo $E_{out}$ por $E_{in} + \Omega$ (recorde que $\Omega$ pode ser interpretado como uma “penalidade” aplicada à cota de $E_{out}$ como resultado da complexidade do modelo escolhido), vamos decompor $E_{out}$ em dois termos diferentes: <strong>viés</strong> e <strong>variância</strong>. Para isso, iremos, como no modelo de regressão, trabalhar com uma medida de erro específica, o <strong>erro quadrático</strong>. Da <a href="/modelo-de-regressao-linear/">parte 05</a>, temos que <script type="math/tex">E_{out}(h) = \mathbb{E}\left[(h(\mathbf{x}) - f(\mathbf{x}_n))^2\right]</script> e <script type="math/tex">E_{in}(h) = \frac{1}{N} \sum_{n = 1}^{N}(h(\mathbf{x}_n) - f(\mathbf{x}_n))^2</script>, para <script type="math/tex">h \in \mathcal{H}</script>.</p>
+
+<p>Assim, podemos escrever que:</p>
+
+<script type="math/tex; mode=display">\begin{align*}
+E_{out}(g^{(\mathcal{D})}) = \mathbb{E}_{\mathbf{x}}\left[(g^{(\mathcal{D})}(\mathbf{x})-f(\mathbf{x}))^2\right],
+\end{align*}</script>
+
+<p>onde $g \in \mathcal{H}$ é a hipótese escolhida por $\mathcal{A}$ e depende, obviamente, do conjunto de dados escolhido $\mathcal{D}$. Além disso, $\mathbb{E}_{\mathbf{x}}\left[\cdot\right]$ é o valor esperado com respeito a $\mathbf{x}$. Agora, para tirar a dependência que $g$ tem de $\mathcal{D}$, podemos tomar a esperança (dessa vez, com respeito a $\mathcal{D}$) dos dois lados da equação $-$ assim, temos que:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+\mathbb{E}_{\mathcal{D}}\left[E_{out}(g^{(\mathcal{D})})\right] & = \mathbb{E}_{\mathcal{D}}\left[\mathbb{E}_{\mathbf{x}}\left[(g^{(\mathcal{D})}(\mathbf{x})-f(\mathbf{x}))^2\right]\right] \\
+& = \mathbb{E}_{\mathbf{x}}\left[\mathbb{E}_{\mathcal{D}}\left[(g^{(\mathcal{D})}(\mathbf{x})-f(\mathbf{x}))^2\right]\right] \text{, já que } (\cdot)^2 > 0 \\
+& = \mathbb{E}_{\mathbf{x}}\left[ \mathbb{E}_{\mathcal{D}}\left[g^{(\mathcal{D})}(\mathbf{x})^2\right] - 2 \bar{g}(\mathbf{x}) f(\mathbf{x}) + f(\mathbf{x})^2 \right] \text{, onde } \bar{g}(\mathbf{x}) = \mathbb{E}_{\mathcal{D}}\left[g^{(\mathcal{D})}(\mathbf{x})\right] \\
+& = \mathbb{E}_{\mathbf{x}}\left[ \mathbb{E}_{\mathcal{D}}\left[g^{(\mathcal{D})}(\mathbf{x})^2\right] - \bar{g}(\mathbf{x})^2 + \bar{g}(\mathbf{x})^2 - 2 \bar{g}(\mathbf{x}) f(\mathbf{x}) + f(\mathbf{x})^2 \right] \\
+& = \mathbb{E}_{\mathbf{x}}\left[ \mathbb{E}_{\mathcal{D}}\left[(g^{(\mathcal{D})}(\mathbf{x}) - \bar{g}(\mathbf{x}))^2\right] + (\bar{g}(\mathbf{x}) - f(\mathbf{x}))^2 \right].
+\end{align*} %]]></script>
+
+<p>Nesse caso, vamos dizer que $\text{Viés}(\mathbf{x}) = (\bar{g}(\mathbf{x}) - f(\mathbf{x}))^2$ e que $\text{Var}(\mathbf{x}) = \mathbb{E}_{\mathcal{D}}\left[( g^{(\mathcal{D})}(\mathbf{x}) - \bar{g}(\mathbf{x}))^2\right]$. <strong>Observação 1:</strong> Aqui, a notação e a forma de definir as quantidades de interesse talvez lhe pareça estranho $-$ para mim, esse também foi o caso $-$, mas as utilizarei com a intenção de seguir o livro <a href="http://www.work.caltech.edu/textbook.html">Learning from Data</a>. Dessa forma, temos que:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+\mathbb{E}_{\mathcal{D}}\left[E_{out}(g^{(\mathcal{D})})\right] & = \mathbb{E}_{\mathcal{x}}\left[\text{Viés}(\mathbf{x}) + \text{Var}(\mathbf{x}) \right] \\
+& = \text{Viés} + \text{Var},
+\end{align*} %]]></script>
+
+<p>onde <script type="math/tex">\text{Viés} = \mathbb{E}_{\mathbf{x}}\left[\text{Viés}(\mathbf{x})\right]</script> e <script type="math/tex">\text{Var} = \mathbb{E}_{\mathbf{x}}\left[\text{Var}(\mathbf{x})\right]</script>. Nesse caso, perceba que a decomposição que fizemos assume que <strong>não</strong> existe ruído $-$ caso fôssemos incluí-lo; i.e., se optássemos por escrever <script type="math/tex">y = f(\mathbf{x}) + \epsilon</script>, teríamos um termo a mais na última soma.</p>
+
+<p>Vamos ver agora que o problema associado ao tamanho (ou complexidade) de $\mathcal{H}$ é capturado pela decomposição de viés-variância de $E_{out}$ que fizemos. Para isso, considere dois cenários extremos:</p>
+
+<ol>
+  <li>
+    <p>$\mathcal{H} = \lbrace h \rbrace$, tal que $h \neq f$. Nesse caso, como o conjunto de hipóteses tem cardinalidade $1$, teremos $g^{(\mathcal{D})}(\mathbf{x}) = \bar{g}(\mathbf{x})$; logo, $\text{Var} = 0$. Porém, o termo $\text{Viés}$ dependerá apenas do quão bem $h$ aproxima $f$ $-$ assim, via de regra, teremos viés alto.</p>
+  </li>
+  <li>
+    <p>$\mathcal{H} = \lbrace h_1, \cdots h_k \rbrace$, para $k$ “muito grande”. Aqui, se $f \in \mathcal{H}$, teremos viés muito próximo de zero. Entretanto, apesar de $\bar{g}(\mathcal{x}) \approx f$, a escolha da hipótese $g$ por $\mathcal{A}$ irá variar de acordo com $\mathcal{D}$, fazendo com que o termo $\text{Var}$ assuma valores (potencialmente) “altos”.</p>
+  </li>
+</ol>
+
+<p><strong>Exemplo:</strong> Suponha que $f(x) = \sin(\pi x)$, e que $\mathcal{D}$ é tal que $N = 2$; com pontos $(x_1, y_1)$ e $(x_2, y_2)$ tal que $x$ é amostrado uniformemente de $[-1, 1]$. Para esse exemplo, considere dois conjuntos de hipóteses:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+\mathcal{H}_0 &: h(x) = b \\
+\mathcal{H}_1 &: h(x) = ax + b.
+\end{align*} %]]></script>
+
+<p>Para $\mathcal{H}_0$, $b$ é escolhido de tal forma que $b = \frac{y_1 + y_2}{2}$. Similarmente, para $\mathcal{H}_1$, nós escolhemos $a$ e $b$ de tal forma que a reta definida por esses valores passa por $(x_1, y_1)$ e $(x_2, y_2)$. Assim, através de simulação, podemos estimar o viés e variância para os modelos que acabamos de definir. Mas antes, veja a figura abaixo $-$ que mostra como as curvas $h(x)$ foram ajustadas para $\mathcal{H}_0$ e $\mathcal{H}_1$ nas várias iterações do processo de simulação que sorteia os pontos de $\mathcal{D}$:</p>
+
+<p><img src="/assets/images/vies-variancia-tradeoff_files/figura-1.png" alt="Simulação-dois-modelos" />
+<em>Figura 1 [fonte: “<a href="http://www.work.caltech.edu/textbook.html">Learning from Data</a>”] $-$ Curva $f(x) = \sin(\pi x)$ para os modelos $\mathcal{H}_0$ e $\mathcal{H}_1$.</em></p>
+
+<p>Perceba, a partir da Fig. 1, que as retas ajustadas para $\mathcal{H}_1$ variam muito mais se comparadas às retas de $\mathcal{H}_0$. A imagem a seguir formaliza essa diferença e sumariza as informações de viés e variância para os dois conjuntos de hipóteses:</p>
+
+<p><img src="/assets/images/vies-variancia-tradeoff_files/figura-2.png" alt="Sumário-de-viés-variância" />
+<em>Figura 2 [fonte: “<a href="http://www.work.caltech.edu/textbook.html">Learning from Data</a>”] $-$ Análise de viés e variância para $\mathcal{H}_0$ e $\mathcal{H}_1$.</em></p>
+
+<p>Como é possível perceber a partir da Fig. 2, apesar de o modelo mais simples <script type="math/tex">\mathcal{H}_0</script> ter maior viés (se comparado a <script type="math/tex">\mathcal{H}_1</script>), ele tem valor esperado para <script type="math/tex">E_{out}</script> menor (soma de viés e variância) e, portanto, é o conjunto de hipóteses preferível nesse cenário. <strong>Observação 2:</strong> como o termo <script type="math/tex">\text{Var}</script> diminui com o aumento de <script type="math/tex">N</script>, caso tivéssemos um amostra maior, o modelo <script type="math/tex">\mathcal{H}_1</script> poderia começar a se tornar a melhor opção.</p>
+
+<p>Aqui, o objetivo prático é diminuir a variância sem aumentar consideravelmente o viés; ou, de forma análoga, diminuir o viés sem aumentar muito a variância. Para alcançar resultados nesse sentido, diversas técnicas podem ser empregadas $-$ <em>regularization</em> é uma delas.</p>
+
+<h2 id="conclusão">Conclusão</h2>
+
+<p>A partir da ideia de que a complexidade de um modelo, associada ao tamanho do conjunto de hipóteses $\mathcal{H}$, é um fator complicado de se tratar $-$ $\mathcal{H}$ grande facilita a minimização de $E_{in}$, mas compromete a generalização de $f$ por $g$; ao passo que $\mathcal{H}$ pequeno compromete o erro amostral, mas permite $E_{out} \approx E_{in}$ $-$, conseguimos, através das quantidades <strong>viés</strong> e <strong>variância</strong>, introduzir um novo tipo de análise. Modelos mais complexos são mais permissíveis em relação ao ajuste da curva aos dados, mas sofrem mais variação com as possíveis amostras para $\mathcal{D}$; por outro lado, modelos mais simples, podem ter dificuldade de captar o comportamento de $f$, mas são menos suscetíveis às variações do conjunto de dados. Esse tipo de análise será feita mais vezes à medida que formos implementando outros exemplos. Por fim, o próximo post voltará a falar de modelos lineares.</p>
+
+<p>Qualquer dúvida, sugestão ou <em>feedback</em>, por favor, deixe um comentário abaixo.</p>
+
+<blockquote>
+  <p>Essa postagem faz parte de uma <a href="/categorias/#machine-learning-learning-from-data">série</a> de textos que tem o objetivo de estudar, principalmente, o curso “<a href="http://www.work.caltech.edu/telecourse.html">Learning from Data</a>”, ministrado pelo Professor Yaser Abu-Mostafa. Outros materiais utilizados serão sempre referenciados.</p>
+</blockquote>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Atualizado em:</strong> <time datetime="2020-01-22T00:00:00-03:00">January 22, 2020</time></p>
+        
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/dimensao-vc/" class="pagination--pager" title="[Parte 09] Dimensão de Vapnik-Chervonenkis
+">Anterior</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Próxima</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Deixe um comentário</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">Talvez você também goste</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/dimensao-vc/" rel="permalink">[Parte 09] Dimensão de Vapnik-Chervonenkis
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  9 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Continuando a discussão que começamos na última parte da nossa série de textos, vamos estudar mais propriedades associadas ao que demos o nome de “Teoria da Generalização”; ou, em outras palavras, ao estudo de como os nossos modelos podem ser generalizados para conjuntos de dados fora de $\mathcal{D}$.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/teoria-da-generalizacao/" rel="permalink">[Parte 08] Teoria da Generalização
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Ao longo dessa e da próxima postagem da nossa série de textos, vamos estabelecer e estudar a distinção que tem que existir entre o conjunto de dados utilizados para treinar o nosso modelo, e o conjunto de dados utilizado para testá-lo.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/erro-e-ruido/" rel="permalink">[Parte 07] Erro e Ruído
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  5 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Formalizando alguns conceitos sobre os quais já falamos ao longo dessa série de textos, essa postagem será dedicada à discussão de: 1) Como quantificar o quão bem a hipótese final $g \in \mathcal{H}$ se aproxima da função alvo $f$? 2) Como lidar com o “ruído” associado à $f$?
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/transformacoes-nao-lineares/" rel="permalink">[Parte 06] Transformações NÃO-lineares &amp; Implementação em Python
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  15 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Como vimos até agora nessa série de textos, modelos lineares (tanto de classificação quanto de regressão) utilizam a quantidade $\sum_{i = 0}^{d} w_i x_i$ para calcular a função $h \in \mathcal{H}$. Note que essa expressão é linear para os $x_i$’s e $w_i$’s; porém, como discutimos na parte 05, os $x_i$’s podem, do p...</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Informações:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://github.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/andre-victor-ribeiro-amaral/" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin-in" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+        
+          <li><a href="https://www.youtube.com/channel/UC5RVscKF68DWYixtJPrBccQ" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-youtube" aria-hidden="true"></i> YouTube</a></li>
+        
+      
+    
+
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2020 André. Desenvolvido com <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "http://localhost:4000/vies-variancia-tradeoff/";  // Replace PAGE_URL with your page's canonical URL variable
+      this.page.identifier = "/vies-variancia-tradeoff"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-do-andre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+  </body>
+</html>
