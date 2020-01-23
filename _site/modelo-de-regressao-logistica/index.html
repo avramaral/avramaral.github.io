@@ -1,0 +1,843 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.17.2 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="pt" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>[Parte 11] Modelo de Regressão Logística &amp; Implementação em Python - Blog do André</title>
+<meta name="description" content="Voltando a falar de modelos lineares, como os de classificação $-$ explorados nas partes 02 e 04 $-$ ou de regressão linear, a exemplo do que vimos na parte 05, iremos discutir nesse post o que é e como funciona a regressão logística. Veremos que esse novo modelo herda características das duas classes de algoritmos que já estudamos, já que é a função alvo é real-avaliada (como na regressão linear), mas é limitada (como no Perceptron ou Pocket, por exemplo).">
+
+
+  <meta name="author" content="André V. R. Amaral">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Blog do André">
+<meta property="og:title" content="[Parte 11] Modelo de Regressão Logística &amp; Implementação em Python">
+<meta property="og:url" content="http://localhost:4000/modelo-de-regressao-logistica/">
+
+
+  <meta property="og:description" content="Voltando a falar de modelos lineares, como os de classificação $-$ explorados nas partes 02 e 04 $-$ ou de regressão linear, a exemplo do que vimos na parte 05, iremos discutir nesse post o que é e como funciona a regressão logística. Veremos que esse novo modelo herda características das duas classes de algoritmos que já estudamos, já que é a função alvo é real-avaliada (como na regressão linear), mas é limitada (como no Perceptron ou Pocket, por exemplo).">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2020-01-23T00:00:00-03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/modelo-de-regressao-logistica/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "André",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Blog do André Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<link rel="shortcut icon" href="../../assets/images/favicon.ico" type="image/x-icon">
+
+<!-- end custom head snippets -->
+
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+          processEscapes: true
+        }
+      });
+    </script>
+    
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          Blog do André
+          <span class="site-subtitle">Probabilidade, estatística e mais.</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/categorias/" >Categorias</a>
+            </li><li class="masthead__menu-item">
+              <a href="/busca/" >Busca</a>
+            </li></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+
+      
+        <img src="/assets/images/profile_picture.jpeg" alt="André V. R. Amaral" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">André V. R. Amaral</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Mestrando em Estatística pela <a href="http://www.est.ufmg.br/portal/">Universidade Federal de Minas Gerais</a>.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Informações</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+            <li><a href="/sobre/" rel="nofollow noopener noreferrer"><i class="far fa-fw fa-question-circle" aria-hidden="true"></i> Sobre</a></li>
+          
+        
+          
+            <li><a href="mailto:avramaral@gmail.com" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i> E-mail</a></li>
+          
+        
+          
+            <li><a href="https://github.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+          
+        
+          
+            <li><a href="https://twitter.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i> Twitter</a></li>
+          
+        
+          
+            <li><a href="https://www.linkedin.com/in/andre-victor-ribeiro-amaral/" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin-in" aria-hidden="true"></i> LinkedIn</a></li>
+          
+        
+          
+            <li><a href="https://www.youtube.com/channel/UC5RVscKF68DWYixtJPrBccQ" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-youtube" aria-hidden="true"></i> YouTube</a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="[Parte 11] Modelo de Regressão Logística &amp; Implementação em Python">
+    <meta itemprop="description" content="Voltando a falar de modelos lineares, como os de classificação $-$ explorados nas partes 02 e 04 $-$ ou de regressão linear, a exemplo do que vimos na parte 05, iremos discutir nesse post o que é e como funciona a regressão logística. Veremos que esse novo modelo herda características das duas classes de algoritmos que já estudamos, já que é a função alvo é real-avaliada (como na regressão linear), mas é limitada (como no Perceptron ou Pocket, por exemplo).">
+    <meta itemprop="datePublished" content="January 23, 2020">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">[Parte 11] Modelo de Regressão Logística &amp; Implementação em Python
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  15 minuto(s) de leitura
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Voltando a falar de modelos lineares, como os de classificação $-$ explorados nas partes <a href="/implementacao-perceptron/">02</a> e <a href="/modelos-lineares-de-classificacao-e-pocket/">04</a> $-$ ou de regressão linear, a exemplo do que vimos na <a href="/modelo-de-regressao-linear/">parte 05</a>, iremos discutir nesse post o que é e como funciona a regressão logística. Veremos que esse novo modelo herda características das duas classes de algoritmos que já estudamos, já que é a função alvo é real-avaliada (como na regressão linear), mas é limitada (como no Perceptron ou Pocket, por exemplo).</p>
+
+<p>Na regressão logística, temos que $f(x) \in [0,1]$; e, como veremos a seguir, esse valor será interpretado como uma probabilidade. Para termos contexto, considere o seguinte exemplo: suponha que você quer modelar, com base em caracteríticas como idade, peso, nível de colesterol, etc., a probabilidade de um indivíduo sofrer um ataque cardíaco nos próximos 12 meses. De posse desse cenário, vamos começar a estabelecer as quantidades de interesse.</p>
+
+<p>Primeiro, vamos começar definindo nossa classe de funções $\mathcal{H}$ para um problema de regressão logística. Nesse caso, teremos que</p>
+
+<script type="math/tex; mode=display">\begin{align*}
+h(\mathbf{x}) = \theta(\mathbf{w}^{\text{T}} \mathbf{x}),
+\end{align*}</script>
+
+<p>onde $\theta(s) = \frac{e^s}{1 + e^s}$. Para enxergar como se comporta a função $\theta$, veja o gráfico a seguir.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="k">def</span> <span class="nf">theta_func</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="n">num</span> <span class="o">=</span> <span class="mi">120</span><span class="p">)</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">theta_func</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">linestyle</span> <span class="o">=</span> <span class="s">"--"</span><span class="p">,</span>  <span class="n">color</span> <span class="o">=</span> <span class="s">"black"</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">linestyle</span> <span class="o">=</span> <span class="s">"--"</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s">"black"</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">linestyle</span> <span class="o">=</span> <span class="s">"--"</span><span class="p">,</span> <span class="n">color</span> <span class="o">=</span> <span class="s">"black"</span><span class="p">,</span> <span class="n">linewidth</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">6</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">"s"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">"$</span><span class="err">\</span><span class="s">Theta$(s)"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/assets/images/modelo-de-regressao-logistica_files/modelo-de-regressao-logistica_3_0.png" alt="png" /></p>
+
+<p>Agora, podemos nos concentrar em analisar a função alvo que a regressão logística está tentando aprender. Logo,</p>
+
+<script type="math/tex; mode=display">\begin{align*}
+f(\mathbf{x}) = \mathbb{P}[y = +1 \mid \mathbf{x}].
+\end{align*}</script>
+
+<p>Porém, perceba que, utilizando $\mathcal{D}$, não temos valores de $f(\mathbf{x})$, mas sim de amostras geradas a partir dessa distribuição de probabilidade (no nosso exemplo, não sabemos dizer a probabilidade com que um paciente sofreu um ataque cardíaco; nesse caso, só sabemos que esse incidente aconteceu). Por isso, estaremos interessados em trabalhar com, ao invés da função alvo, a <strong>distribuição alvo</strong>:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+P(y \mid \mathbf{x}) = 
+\begin{cases}  
+    f(\mathbf{x}) & \text{ para } y = +1 \\
+    1 - f(\mathbf{x}) & \text{ para } y = -1.
+\end{cases} %]]></script>
+
+<p>Finalmente, só nos resta definir uma medida de erro $\text{e}(h(\mathbf{x}), y)$ para minimizar. Aqui, a ideia de verossimilhança irá exercer papel fundamental $-$ ou seja, o processo será o de encontrar a $h \in \mathcal{H}$ que, baseado em $\mathbf{x}$, melhor explica o resultado $y$. Assim, a verossimilhança será dada por:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+P(y \mid \mathbf{x}; \mathbf{w}) = 
+\begin{cases}  
+    h_{\mathbf{w}}(\mathbf{x}) & \text{ para } y = +1 \\
+    1 - h_{\mathbf{w}}(\mathbf{x}) & \text{ para } y = -1.
+\end{cases} %]]></script>
+
+<p>Então, substituindo $h_{\mathbf{w}}(\mathbf{x})$ por $\theta(\mathbf{x}^{\text{T}} \mathbf{x})$ e utilizando o fato de que $\theta(-s) = 1 - \theta(s)$, temos que:</p>
+
+<script type="math/tex; mode=display">\begin{align*}
+P(y \mid \mathbf{x}; \mathbf{w}) = \theta(y \; \mathbf{w}^{\text{T}}\mathbf{x}).
+\end{align*}</script>
+
+<p>Já que, por hipótese, os pontos de $\mathcal{D}$ são gerados de maneira independente, então:</p>
+
+<script type="math/tex; mode=display">\begin{align*}
+\prod_{n = 1}^{N} P(y_n \mid \mathbf{x}_n; \mathbf{w}) = \prod_{n = 1}^{N} \theta(y_n \; \mathbf{w}^{\text{T}}\mathbf{x}_n).
+\end{align*}</script>
+
+<p>Como maximizar a função de verossimilhança é o mesmo que minizar o erro, podemos definir $E_{in}$ como:</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+E_{in}(\mathbf{w}) & = -\frac{1}{N} \; \ln \left[ \prod_{n = 1}^{N} \theta(y_n \; \mathbf{w}^{\text{T}}\mathbf{x}_n) \right] \\
+& = \frac{1}{N} \sum_{n = 1}^{N} \ln \left[ \frac{1}{\theta(y_n \; \mathbf{w}^{\text{T}}\mathbf{x}_n)} \right] \\
+& = \frac{1}{N} \sum_{n = 1}^{N} \ln \left[ 1 + e^{- y_n \mathbf{w}^{\text{T}}\mathbf{x}_n} \right] \text{, tal que } \theta(s) = \frac{1}{1 + e^{-s}}
+\end{align*} %]]></script>
+
+<p>De forma explicita, acabamos de dizer que $\text{e}(h(\mathbf{x}_n), y_n)= \left[ 1 + e^{- y_n \mathbf{w}^{\text{T}}\mathbf{x}_n} \right]$. A medida de erro definida dessa maneira é chamada de <em>‘cross entropy’ error</em>.</p>
+
+<p>Agora, a nossa missão é encontrar $\mathbf{w}$ que minimiza $E_{in}$; porém, da maneira como definimos o erro, não é possível determinar uma solução analítica para esse problema. Assim, utilizaremos uma técnica (de iteração) conhecida como <strong>Gradiente Descendente</strong>.</p>
+
+<h3 id="gradiente-descendente-para-regressão-logística">Gradiente Descendente para Regressão Logística</h3>
+
+<p>Gradiente descendente é um algoritmo utilizado para minimizar funções que são, pelo menos, duas vezes diferenciáveis, tal como $E_{in}(\mathbf{w})$. A ideia é que, através de um processo de iteração, o algoritmo, que começa com $\mathbf{w}(0)$ definido arbitrariamanente, encontra $\mathbf{w}(m)$ $-$ para $m$ suficientemente grande $-$, que é <em>mínimo local</em> de $E_{in}(\mathbf{w})$. Entretanto, o fato de não existir garantia de que o <em>mínimo local</em> é, também, <em>mínimo global</em>, é um problema que precisa ser tratato (esse cenário será discutido em outra oportunidade). Felizmente, para a regressão logística (bem como para o modelo de regressão linear), $E_{in}$ é função convexa, o que implica que, nesse caso, o ponto de mínimo é único.</p>
+
+<p>Dito isso, vamos descrever como encontrar esse ponto de mínimo. Aqui, suponha que vamos dar pequenos passos de tamanho $\eta$ na direção do vetor unitário $\mathbf{\hat{v}}$; assim, teremos $\mathbf{w}(1) = \mathbf{w}(0) + \eta \; \mathbf{\hat{v}}$. Dessa forma, com a intenção de fazer $\Delta E_{in}$ o menor possível, obtemos, utilizando a expansão de Taylor (<a href="https://en.wikipedia.org/wiki/Taylor_series#Taylor_series_in_several_variables">ref.</a>):</p>
+
+<script type="math/tex; mode=display">% <![CDATA[
+\begin{align*}
+\Delta E_{in} & = E_{in}(\mathbf{w}(0) + \eta \mathbf{\hat{v}}) - E_{in}(\mathbf{w}(0)) \\
+& = E_{in}(\mathbf{w}(0)) + (\mathbf{w}(1) - \mathbf{w}(0))^{\text{T}} \; \nabla E_{in}(\mathbf{w}(0)) + \mathcal{O}(\eta^2) - E_{in}(\mathbf{w}(0)) \\
+& \geq (\eta \; \mathbf{\hat{v}})^{\text{T}} \; \nabla E_{in}(\mathbf{w}(0)) \\
+& = \eta \; \nabla E_{in}(\mathbf{w}(0))^{\text{T}} \; \mathbf{\hat{v}} \\
+& \geq - \eta \; \lvert \lvert \nabla E_{in}(\mathbf{w}(0)) \rvert \rvert \text{, já que } \max_{u: \lvert \lvert u \rvert \rvert = 1} \langle u, v \rangle = \lvert \lvert v \rvert \rvert.
+\end{align*} %]]></script>
+
+<p>Assim, em relação a última desigualdade, vale o “$=$” se e somente se:</p>
+
+<script type="math/tex; mode=display">\begin{align*}
+\mathbf{\hat{v}} = -\frac{\nabla E_{in}(\mathbf{w}(0))}{\lvert \lvert \nabla E_{in}(\mathbf{w}(0)) \rvert \rvert}.
+\end{align*}</script>
+
+<p>Ou seja, o vetor unitário $\mathbf{\hat{v}}$ com direção como definido acima, é o que me dá a maior variação negativa de $\Delta E_{in}$ para um passo de tamanho $\eta$. A ideia, a partir desse ponto, é iterar sobre o processo que acabamos de descrever.</p>
+
+<p>Porém, um problema surge: como podemos definir adequadamente o tamanho do passo $\eta$? Se ele for muito pequeno, como na imagem da esquerda (Fig. 1), o algoritmo é ineficiente quando não estamos perto do mínimo local; se ele for muito grande, como na imagem do centro, podemos, inclusive, aumentar $E_{in}$. Nesse caso, o ideal é tomar passos de tamanho proporcional à distância que estamos do ponto de mínimo, como na imagem da direita.</p>
+
+<p><img src="/assets/images/modelo-de-regressao-logistica_files/tamanho-de-eta.png" alt="Tamanho de eta" />
+<em>Figura 1 [fonte: “<a href="http://www.work.caltech.edu/textbook.html">Learning from Data</a>”] $-$ Opções para tamanho de $\eta$.</em></p>
+
+<p>Para alcançar uma solução como a apresentada na imagem da direita (Fig. 1) basta fazer $\eta = \eta \; \lvert\lvert \nabla E_{in} \rvert\rvert$. Essa estratégia funciona pois, longe do mínimo local, a norma vetor gradiente é tipicamente maior; ao passo que, perto do ponto de mínimo, essa quantidade diminui.</p>
+
+<p>Por fim, como</p>
+
+<script type="math/tex; mode=display">\nabla E_{in} = - \frac{1}{N} \sum_{n = 1}^{N} \frac{y_n \mathbf{x}_n}{1 + e^{y_n \mathbf{w}^{\text{T}}\mathbf{x}_n}},</script>
+
+<p>somos capazes de implementar um algoritmo, como explicitado na Fig. 2, para resolver o problema de regressão logística.</p>
+
+<p><img src="/assets/images/modelo-de-regressao-logistica_files/algoritmo-reg-log.png" alt="Algoritmo Regressão Logística" />
+<em>Figura 2 [fonte: “<a href="http://www.work.caltech.edu/textbook.html">Learning from Data</a>”] $-$ Algoritmo para Regressão Logística.</em></p>
+
+<h3 id="implementação-em-python">Implementação em Python</h3>
+
+<p>Vamos começar por, seguindo as ideias que desenvolvemos ao longo do texto e o algoritmo apresentado na Fig. 2, implementar a classe <code class="highlighter-rouge">LogisticRegression</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Raw implementation
+</span><span class="k">class</span> <span class="nc">LogisticRegression</span><span class="p">:</span>
+    <span class="s">"""
+    Logist Regression Algorithm
+    """</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eta</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">n_iter</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">prob_threshold</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">prob_out</span> <span class="o">=</span> <span class="bp">False</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">eta</span> <span class="o">=</span> <span class="n">eta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span> <span class="o">=</span> <span class="n">n_iter</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prob_out</span> <span class="o">=</span> <span class="n">prob_out</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prob_threshold</span> <span class="o">=</span> <span class="n">prob_threshold</span>
+    
+    <span class="k">def</span> <span class="nf">sigmoid_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+    
+    <span class="k">def</span> <span class="nf">gradient_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">partial_sum</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">X</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">X_i</span><span class="p">,</span> <span class="n">y_i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+            <span class="n">num</span> <span class="o">=</span> <span class="n">y_i</span> <span class="o">*</span> <span class="n">X_i</span> 
+            <span class="n">den</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">y_i</span> <span class="o">*</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">))))</span>
+            <span class="n">partial_sum</span> <span class="o">+=</span> <span class="p">(</span><span class="n">num</span> <span class="o">/</span> <span class="n">den</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">/</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">partial_sum</span> 
+            
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w_</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">n_iter</span><span class="p">):</span>
+            <span class="n">grad</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">gradient_</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w_</span> <span class="o">-=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eta</span> <span class="o">*</span> <span class="n">grad</span><span class="p">)</span> 
+        <span class="k">return</span> <span class="bp">self</span>
+    
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_i</span><span class="p">):</span>
+        <span class="n">probability</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sigmoid_</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X_i</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prob_out</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">probability</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">probability</span> <span class="o">&gt;=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prob_threshold</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Adotando o mesmo padrão de nomes para outras classes que já escrevemos, o método <code class="highlighter-rouge">fit()</code> ajusta o modelo $-$ utilizando, para isso, a função <code class="highlighter-rouge">gradient_()</code>. O método <code class="highlighter-rouge">predict()</code>, através da função <code class="highlighter-rouge">sigmoid_()</code>, calcula a probabilidade de uma nova observação assumir valor $+1$ ou, como usaremos a partir desse daqui, classifica um novo ponto de acordo com o limite <code class="highlighter-rouge">prob_threshold</code>.</p>
+
+<p>Agora, vamos, com um conjunto de dados simulado, ajustar o modelo. Mas primeiro, veja como os pontos são distribuídos.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">N</span> <span class="o">=</span> <span class="mi">250</span>
+
+<span class="n">rn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">999</span><span class="p">)</span>
+<span class="n">c1</span> <span class="o">=</span> <span class="n">rn</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">N</span><span class="p">)</span>
+<span class="n">c2</span> <span class="o">=</span> <span class="n">rn</span><span class="o">.</span><span class="n">multivariate_normal</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span> <span class="n">N</span><span class="p">)</span>
+
+<span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">]</span>
+<span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">)]),</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">([</span><span class="mi">1</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">N</span><span class="p">)])]</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">[:</span><span class="n">N</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="p">[:</span><span class="n">N</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">color</span> <span class="o">=</span> <span class="s">"red"</span><span class="p">,</span>   <span class="n">marker</span> <span class="o">=</span> <span class="s">"o"</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s">"Class A"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">N</span><span class="p">:,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="n">N</span><span class="p">:,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">color</span> <span class="o">=</span> <span class="s">"green"</span><span class="p">,</span> <span class="n">marker</span> <span class="o">=</span> <span class="s">"s"</span><span class="p">,</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s">"Class B"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/assets/images/modelo-de-regressao-logistica_files/modelo-de-regressao-logistica_26_0.png" alt="png" /></p>
+
+<p>Perceba que as duas classes <code class="highlighter-rouge">Class A</code> e <code class="highlighter-rouge">Class B</code> <strong>não</strong> são linearmente separáveis; mais do que isso, na verdade: a região de interseção entre as duas nuvens de pontos é razoavelmente grande. Abaixo, o ajuste do modelo:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">my_logReg</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">()</span>
+<span class="n">my_logReg</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">my_logReg</span><span class="o">.</span><span class="n">w_</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[-1.1072962  -0.52486136  1.16919589]
+</code></pre></div></div>
+
+<p>A seguir, vamos plotar as regiões de decisão para cada uma das classes com <code class="highlighter-rouge">prob_threshold = 0.5</code>. Para isso, utilizaremos a nossa função, já várias vezes mencionada ao longo dos posts, <code class="highlighter-rouge">plot_decision_regions()</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">plot_decision_regions</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">classifier</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">resolution</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="n">plot_lim</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">):</span>
+    <span class="c1"># general settings
+</span>    <span class="n">markers</span> <span class="o">=</span> <span class="p">[</span><span class="s">"o"</span><span class="p">,</span> <span class="s">"s"</span><span class="p">,</span> <span class="s">"*"</span><span class="p">,</span> <span class="s">"x"</span><span class="p">,</span> <span class="s">"v"</span><span class="p">]</span>
+    <span class="n">colors</span>  <span class="o">=</span> <span class="p">(</span><span class="s">"red"</span><span class="p">,</span> <span class="s">"green"</span><span class="p">,</span> <span class="s">"blue"</span><span class="p">,</span> <span class="s">"gray"</span><span class="p">,</span> <span class="s">"cyan"</span><span class="p">)</span>
+    <span class="n">x1_min</span><span class="p">,</span> <span class="n">x1_max</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="nb">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">plot_lim</span><span class="p">,</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="nb">max</span><span class="p">()</span> <span class="o">+</span> <span class="n">plot_lim</span>
+    <span class="n">x2_min</span><span class="p">,</span> <span class="n">x2_max</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="nb">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">plot_lim</span><span class="p">,</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="nb">max</span><span class="p">()</span> <span class="o">+</span> <span class="n">plot_lim</span>
+    <span class="c1"># define a grid
+</span>    <span class="n">xx1</span><span class="p">,</span> <span class="n">xx2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">x1_min</span><span class="p">,</span> <span class="n">x1_max</span><span class="p">,</span> <span class="n">resolution</span><span class="p">),</span>
+                           <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">x2_min</span><span class="p">,</span> <span class="n">x2_max</span><span class="p">,</span> <span class="n">resolution</span><span class="p">))</span>
+    <span class="c1"># classify each grid point
+</span>    <span class="n">result</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">xx1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">xx2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()])</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">xx1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="c1"># make a plot
+</span>    <span class="n">plt</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">xx1</span><span class="p">,</span> <span class="n">xx2</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">colors</span> <span class="o">=</span> <span class="n">colors</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">))],</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">)):</span> 
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">value</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">value</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> 
+                    <span class="n">color</span> <span class="o">=</span> <span class="n">colors</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+                    <span class="n">marker</span> <span class="o">=</span> <span class="n">markers</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+                    <span class="n">label</span> <span class="o">=</span> <span class="n">feature_names</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+                    <span class="n">edgecolor</span> <span class="o">=</span> <span class="s">'black'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span><span class="s">'Classe A'</span><span class="p">,</span> <span class="s">'Classe B'</span><span class="p">]</span>
+<span class="n">plot_decision_regions</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">my_logReg</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">plot_lim</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">"Fitted Model with Raw Implementation of Logistic Regression"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">"$x_1$"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">"$x_2$"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/assets/images/modelo-de-regressao-logistica_files/modelo-de-regressao-logistica_31_0.png" alt="png" /></p>
+
+<p>No gráfico acima, veja que conseguimos, à medida do que é possível com o conjunto de dados de treinamento $\mathcal{D}$, criar regiões que classificam corretamente a maior parte dos pontos.</p>
+
+<p>Entretanto, abordando o problema dessa maneira $-$ como um problema de classificação simples $-$, perdemos uma característica importante do modelo de regressão logística: a ideia de que cada ponto vale $+1$ com <strong>probabilidade</strong> $h_{\mathbf{w}}(\mathbf{x})$ (na verdade, $g_{\mathbf{w}}(\mathbf{x})$ $-$ se $g \in \mathcal{H}$ foi escholida por $\mathcal{A}$). Veja o trecho de código abaixo:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="c1"># Test: predict the probability, instead of the class
+</span><span class="n">my_logReg</span><span class="o">.</span><span class="n">prob_out</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">chosen_point</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span> <span class="c1"># a very 'difficult' point to classify
+</span><span class="k">print</span><span class="p">(</span><span class="s">"With probability {:.2f}, the point {} is evaluated as +1."</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">my_logReg</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">chosen_point</span><span class="p">),</span> <span class="n">chosen_point</span><span class="p">))</span>
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>With probability 0.52, the point [0 1] is evaluated as +1.
+</code></pre></div></div>
+
+<p>Observe que o ponto $(0, 1)$, analisando as regiões de decisão que foram plotadas, está no limiar da fronteira de classificação. O que faz sentido com o fato de que obtivemos $\mathbb{P}[y = +1 \mid \mathbf{x}] = 0.52$; ou seja, apesar de $(0, 1)$ ter sido classificado como $+1$ (para o threshold de $0.5$), isso aconteceu por bem pouco.</p>
+
+<p>Para finalizar, assim como já fizemos outras vezes, vamos utilizar a implementação do algoritmo pela biblioteca Sklearn.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LogisticRegression</span>
+<span class="n">sk_logReg</span> <span class="o">=</span> <span class="n">LogisticRegression</span><span class="p">()</span>
+<span class="n">sk_logReg</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">sk_logReg</span><span class="o">.</span><span class="n">intercept_</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="n">sk_logReg</span><span class="o">.</span><span class="n">coef_</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>[-4.5329416]
+[[-1.70651758  3.08848517]]
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span><span class="s">'Class A'</span><span class="p">,</span> <span class="s">'Class B'</span><span class="p">]</span>
+<span class="n">plot_decision_regions</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">sk_logReg</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">plot_lim</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">"Fitted model with Sklearn version of Logistic Regression"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">"$x_1$"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">"$x_2$"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/assets/images/modelo-de-regressao-logistica_files/modelo-de-regressao-logistica_38_0.png" alt="png" /></p>
+
+<p>Como era de se espera, a utilização da classe <code class="highlighter-rouge">LogisticRegression</code> é simples e apresenta resultados semelhantes aos que obtivemos acima. A performance nesse segundo caso é, obviamente, muito mais otimizada; porém, como forma de aprendizado, a nossa classe cumpriu bem a tarefa.</p>
+
+<h2 id="conclusão">Conclusão</h2>
+
+<p>Complementando os modelos lineares (e transformações não-lineares) que já havíamos começado a estudar nas partes <a href="/modelo-de-regressao-linear/">05</a> e <a href="/transformacoes-nao-lineares/">06</a>, vimos como o modelo de Regressão Logística pode ser utilizado para, por exemplo, problemas de classificação. Entretando, a sua capacidade de fazer esse tipo de análise do ponto de vista probabilístico é o que é o mais interessante. Implementamos o algoritmo em Python e, em adição às classes que escrevemos antes, estamos começando a construir um bom repositório de algoritmos de <em>machine learning</em>. O próximo post discutirá o assunto “<em>neural networks</em>” (ou “redes neurais”).</p>
+
+<p>Qualquer dúvida, sugestão ou <em>feedback</em>, por favor, deixe um comentário abaixo.</p>
+
+<blockquote>
+  <p>Essa postagem faz parte de uma <a href="/categorias/#machine-learning-learning-from-data">série</a> de textos que tem o objetivo de estudar, principalmente, o curso “<a href="http://www.work.caltech.edu/telecourse.html">Learning from Data</a>”, ministrado pelo Professor Yaser Abu-Mostafa. Outros materiais utilizados serão sempre referenciados.</p>
+</blockquote>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Atualizado em:</strong> <time datetime="2020-01-23T00:00:00-03:00">January 23, 2020</time></p>
+        
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/vies-variancia-tradeoff/" class="pagination--pager" title="[Parte 10] Trade-off entre Viés-Variância
+">Anterior</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Próxima</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Deixe um comentário</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">Talvez você também goste</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/vies-variancia-tradeoff/" rel="permalink">[Parte 10] Trade-off entre Viés-Variância
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  7 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Continuando com a discussão, introduzida na parte 09 dessa série de textos, de que deve existir um “meio termo” sobre o tamanho de $\mathcal{H}$ $-$ lembre-se: se $\mathcal{H}$ é muito grande, conseguimos diminuir o termo $E_{in}$; porém, somos penalizados na generalização do modelo para dados fora de $\mathcal{D}$....</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/dimensao-vc/" rel="permalink">[Parte 09] Dimensão de Vapnik-Chervonenkis
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  9 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Continuando a discussão que começamos na última parte da nossa série de textos, vamos estudar mais propriedades associadas ao que demos o nome de “Teoria da Generalização”; ou, em outras palavras, ao estudo de como os nossos modelos podem ser generalizados para conjuntos de dados fora de $\mathcal{D}$.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/teoria-da-generalizacao/" rel="permalink">[Parte 08] Teoria da Generalização
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  8 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Ao longo dessa e da próxima postagem da nossa série de textos, vamos estabelecer e estudar a distinção que tem que existir entre o conjunto de dados utilizados para treinar o nosso modelo, e o conjunto de dados utilizado para testá-lo.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/erro-e-ruido/" rel="permalink">[Parte 07] Erro e Ruído
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  5 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Formalizando alguns conceitos sobre os quais já falamos ao longo dessa série de textos, essa postagem será dedicada à discussão de: 1) Como quantificar o quão bem a hipótese final $g \in \mathcal{H}$ se aproxima da função alvo $f$? 2) Como lidar com o “ruído” associado à $f$?
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Informações:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://github.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/andre-victor-ribeiro-amaral/" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin-in" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+        
+          <li><a href="https://www.youtube.com/channel/UC5RVscKF68DWYixtJPrBccQ" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-youtube" aria-hidden="true"></i> YouTube</a></li>
+        
+      
+    
+
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2020 André. Desenvolvido com <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "http://localhost:4000/modelo-de-regressao-logistica/";  // Replace PAGE_URL with your page's canonical URL variable
+      this.page.identifier = "/modelo-de-regressao-logistica"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-do-andre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+  </body>
+</html>
