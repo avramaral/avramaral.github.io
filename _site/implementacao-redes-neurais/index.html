@@ -1,0 +1,817 @@
+<!doctype html>
+<!--
+  Minimal Mistakes Jekyll Theme 4.17.2 by Michael Rose
+  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Free for personal and commercial use under the MIT license
+  https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
+-->
+<html lang="pt" class="no-js">
+  <head>
+    <meta charset="utf-8">
+
+<!-- begin _includes/seo.html --><title>[Parte 13] Implementação em Python: Redes Neurais - Blog do André</title>
+<meta name="description" content="Como continuação direta da parte 12 dessa série de textos, vamos, ao longo desse post, implementar uma rede neural utilizando Python. E, para testá-la, vamos resolver um problema de classificação binária de dados que não são linearmente separáveis $-$ aqui, não faremos como na parte 06, onde utilizamos transformações explícitas sobre o conjunto de dados. Hoje, as transformações serão resultado do processo de aprendizado da rede.">
+
+
+  <meta name="author" content="André V. R. Amaral">
+
+
+<meta property="og:type" content="article">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:site_name" content="Blog do André">
+<meta property="og:title" content="[Parte 13] Implementação em Python: Redes Neurais">
+<meta property="og:url" content="http://localhost:4000/implementacao-redes-neurais/">
+
+
+  <meta property="og:description" content="Como continuação direta da parte 12 dessa série de textos, vamos, ao longo desse post, implementar uma rede neural utilizando Python. E, para testá-la, vamos resolver um problema de classificação binária de dados que não são linearmente separáveis $-$ aqui, não faremos como na parte 06, onde utilizamos transformações explícitas sobre o conjunto de dados. Hoje, as transformações serão resultado do processo de aprendizado da rede.">
+
+
+
+
+
+
+
+  <meta property="article:published_time" content="2020-01-29T00:00:00-03:00">
+
+
+
+
+
+  
+
+  
+
+
+<link rel="canonical" href="http://localhost:4000/implementacao-redes-neurais/">
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
+      "@type": "Person",
+      "name": "André",
+      "url": "http://localhost:4000/"
+    
+  }
+</script>
+
+
+
+
+
+
+<!-- end _includes/seo.html -->
+
+
+<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="Blog do André Feed">
+
+<!-- https://t.co/dKP3o1e -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script>
+  document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/g, '') + ' js ';
+</script>
+
+<!-- For all browsers -->
+<link rel="stylesheet" href="/assets/css/main.css">
+
+<!--[if IE]>
+  <style>
+    /* old IE unsupported flexbox fixes */
+    .greedy-nav .site-title {
+      padding-right: 3em;
+    }
+    .greedy-nav button {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+    }
+  </style>
+<![endif]-->
+
+
+
+    <!-- start custom head snippets -->
+
+<!-- insert favicons. use https://realfavicongenerator.net/ -->
+
+<link rel="shortcut icon" href="../../assets/images/favicon.ico" type="image/x-icon">
+
+<!-- end custom head snippets -->
+
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"] ],
+          processEscapes: true
+        }
+      });
+    </script>
+    
+  </head>
+
+  <body class="layout--single wide">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
+
+    <!--[if lt IE 9]>
+<div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
+<![endif]-->
+
+    
+
+<div class="masthead">
+  <div class="masthead__inner-wrap">
+    <div class="masthead__menu">
+      <nav id="site-nav" class="greedy-nav">
+        
+        <a class="site-title" href="/">
+          Blog do André
+          <span class="site-subtitle">Probabilidade, estatística e mais.</span>
+        </a>
+        <ul class="visible-links"><li class="masthead__menu-item">
+              <a href="/categorias/" >Categorias</a>
+            </li><li class="masthead__menu-item">
+              <a href="/busca/" >Busca</a>
+            </li></ul>
+        
+        <button class="greedy-nav__toggle hidden" type="button">
+          <span class="visually-hidden">Toggle menu</span>
+          <div class="navicon"></div>
+        </button>
+        <ul class="hidden-links hidden"></ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+    <div class="initial-content">
+      
+
+
+
+<div id="main" role="main">
+  
+  <div class="sidebar sticky">
+  
+
+
+<div itemscope itemtype="https://schema.org/Person">
+
+  
+    <div class="author__avatar">
+      
+
+      
+        <img src="/assets/images/profile_picture.jpeg" alt="André V. R. Amaral" itemprop="image">
+      
+    </div>
+  
+
+  <div class="author__content">
+    
+      <h3 class="author__name" itemprop="name">André V. R. Amaral</h3>
+    
+    
+      <div class="author__bio" itemprop="description">
+        <p>Mestrando em Estatística pela <a href="http://www.est.ufmg.br/portal/">Universidade Federal de Minas Gerais</a>.</p>
+
+      </div>
+    
+  </div>
+
+  <div class="author__urls-wrapper">
+    <button class="btn btn--inverse">Informações</button>
+    <ul class="author__urls social-icons">
+      
+
+      
+        
+          
+            <li><a href="/sobre/" rel="nofollow noopener noreferrer"><i class="far fa-fw fa-question-circle" aria-hidden="true"></i> Sobre</a></li>
+          
+        
+          
+            <li><a href="mailto:avramaral@gmail.com" rel="nofollow noopener noreferrer"><i class="fas fa-fw fa-envelope-square" aria-hidden="true"></i> E-mail</a></li>
+          
+        
+          
+            <li><a href="https://github.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+          
+        
+          
+            <li><a href="https://twitter.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i> Twitter</a></li>
+          
+        
+          
+            <li><a href="https://www.linkedin.com/in/andre-victor-ribeiro-amaral/" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin-in" aria-hidden="true"></i> LinkedIn</a></li>
+          
+        
+          
+            <li><a href="https://www.youtube.com/channel/UC5RVscKF68DWYixtJPrBccQ" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-youtube" aria-hidden="true"></i> YouTube</a></li>
+          
+        
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      <!--
+  <li>
+    <a href="http://link-to-whatever-social-network.com/user/" itemprop="sameAs" rel="nofollow noopener noreferrer">
+      <i class="fas fa-fw" aria-hidden="true"></i> Custom Social Profile Link
+    </a>
+  </li>
+-->
+    </ul>
+  </div>
+</div>
+
+  
+  </div>
+
+
+  <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
+    <meta itemprop="headline" content="[Parte 13] Implementação em Python: Redes Neurais">
+    <meta itemprop="description" content="Como continuação direta da parte 12 dessa série de textos, vamos, ao longo desse post, implementar uma rede neural utilizando Python. E, para testá-la, vamos resolver um problema de classificação binária de dados que não são linearmente separáveis $-$ aqui, não faremos como na parte 06, onde utilizamos transformações explícitas sobre o conjunto de dados. Hoje, as transformações serão resultado do processo de aprendizado da rede.">
+    <meta itemprop="datePublished" content="January 29, 2020">
+    
+
+    <div class="page__inner-wrap">
+      
+        <header>
+          <h1 id="page-title" class="page__title" itemprop="headline">[Parte 13] Implementação em Python: Redes Neurais
+</h1>
+          
+            <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  16 minuto(s) de leitura
+
+</p>
+          
+        </header>
+      
+
+      <section class="page__content" itemprop="text">
+        
+        <p>Como continuação direta da <a href="/redes-neurais/">parte 12</a> <a href="/categorias/#machine-learning-learning-from-data">dessa série de textos</a>, vamos, ao longo desse post, implementar uma rede neural utilizando Python. E, para testá-la, vamos resolver um problema de classificação binária de dados que <strong>não</strong> são linearmente separáveis $-$ aqui, não faremos como na <a href="/transformacoes-nao-lineares/">parte 06</a>, onde utilizamos transformações explícitas sobre o conjunto de dados. Hoje, as transformações serão resultado do processo de aprendizado da rede.</p>
+
+<p>Diferente dos outros textos nos quais implementamos algoritmos de <em>machine learning</em> $-$ e.g., Perceptron, Regressão Linear, Regressão Logística, etc., nessa postagem vamos adotar uma ordem diferente para as coisas. Vamos começar com o conjunto de dados com o qual vamos trabalhar.</p>
+
+<p>Nesse caso, ao invés de utilizarmos algum banco de dados conhecido, ou mesmo de simularmos algo que nos daria a característica desejada, vamos utilizar um <em>data set</em> que vem da biblioteca Sklearn. Perceba que <strong>não</strong> iremos utilizar qualquer implementação de algoritmo pela biblioteca; aqui, <strong>apenas</strong> o banco de dados será considerado. Importando as bibliotecas que iremos utilizar e plotando o gráfico dos dados que obtivemos, temos o seguinte:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">%</span><span class="n">matplotlib</span> <span class="n">inline</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+
+<span class="kn">from</span> <span class="nn">sklearn.datasets</span> <span class="kn">import</span> <span class="n">make_moons</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">X</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">make_moons</span><span class="p">(</span><span class="n">n_samples</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="n">noise</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">)</span> <span class="c1"># generate non-linear separable data
+</span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">y</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">color</span> <span class="o">=</span> <span class="s">"red"</span><span class="p">,</span> <span class="n">marker</span> <span class="o">=</span> <span class="s">"o"</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s">"Class A"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span>  <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span>  <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">color</span> <span class="o">=</span> <span class="s">"green"</span><span class="p">,</span> <span class="n">marker</span> <span class="o">=</span> <span class="s">"s"</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="s">"Class B"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">"$x_1$"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">"$x_2$"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span> <span class="o">=</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/assets/images/implementacao-redes-neurais_files/implementacao-redes-neurais_3_0.png" alt="png" /></p>
+
+<p>Aqui, o banco <code class="highlighter-rouge">make_moons</code> gera dados, como o nome sugere, que tem comportamento gráfico parecido com duas meias-luas. O parâmetro <code class="highlighter-rouge">noise</code> especifica o ruído sobre esse padrão. A única observação é que, ao invés de usarmos a classificação de <code class="highlighter-rouge">0</code> ou <code class="highlighter-rouge">1</code>, a <code class="highlighter-rouge">Class A</code> ficou rotulada como <code class="highlighter-rouge">-1</code> e a <code class="highlighter-rouge">Class B</code>, como <code class="highlighter-rouge">+1</code>.</p>
+
+<p>Agora vamos à nossa classe que implementa o algoritmo: <code class="highlighter-rouge">NeuralNetwork</code>. O código é grande, então, para conseguirmos estudá-lo adequadamente, vou inserí-lo por completo agora, e, na sequência, comentamos parte por parte.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">NeuralNetwork</span><span class="p">:</span>
+    <span class="s">"""
+    Neural Network Model
+    """</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim</span><span class="p">,</span> <span class="n">eta</span> <span class="o">=</span> <span class="mf">1e-1</span><span class="p">,</span> <span class="n">epoch</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim</span> <span class="o">=</span> <span class="n">dim</span> <span class="c1"># vector with layers dimensions - including input (0) and output (L)
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dim</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="c1"># 'L' equals to the number of layers, which does not count input (0)
+</span>        <span class="bp">self</span><span class="o">.</span><span class="n">eta</span> <span class="o">=</span> <span class="n">eta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epoch</span> <span class="o">=</span> <span class="n">epoch</span>
+    
+    
+    <span class="k">def</span> <span class="nf">initialize_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w_</span> <span class="o">=</span> <span class="p">{}</span> <span class="c1"># it will include 'bias'
+</span>        
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">'W'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">=</span> <span class="n">rn</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">1e-1</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">[</span><span class="n">l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">[</span><span class="n">l</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">[</span><span class="n">l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim</span><span class="p">[</span><span class="n">l</span><span class="p">])</span>
+    
+    
+    <span class="k">def</span> <span class="nf">theta_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">s</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">s</span><span class="p">))</span>
+    
+    
+    <span class="k">def</span> <span class="nf">forward_propagation_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X_n</span><span class="p">):</span>
+        <span class="n">X_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="n">X_n</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">s_</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_</span><span class="p">[</span><span class="s">'x0'</span><span class="p">]</span> <span class="o">=</span> <span class="n">X_n</span>
+        
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">s_</span><span class="p">[</span><span class="s">'s'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">'W'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_</span><span class="p">[</span><span class="s">'x'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">x_</span><span class="p">[</span><span class="s">'x'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">r_</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">theta_</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">s_</span><span class="p">[</span><span class="s">'s'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)])]</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_</span><span class="p">[</span><span class="s">'x'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_</span><span class="p">[</span><span class="s">'x'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)][</span><span class="mi">1</span><span class="p">:]</span> <span class="c1"># do not use extra '1' at the last layer
+</span>        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_</span><span class="p">[</span><span class="s">'x'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)]</span>
+    
+    
+    <span class="k">def</span> <span class="nf">back_propagation_</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x_n</span><span class="p">,</span> <span class="n">y_n</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">d_</span><span class="p">[</span><span class="s">'d'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_</span><span class="p">[</span><span class="s">'x'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)]</span> <span class="o">-</span> <span class="n">y_n</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_</span><span class="p">[</span><span class="s">'x'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)])</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        
+        <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span> <span class="c1"># reverse order iteration, from 'L - 1' to 1 (inclusive)
+</span>            <span class="n">t_prime</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_</span><span class="p">[</span><span class="s">'x'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_</span><span class="p">[</span><span class="s">'x'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)])[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">d_</span><span class="p">[</span><span class="s">'d'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">t_prime</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">'W'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)],</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_</span><span class="p">[</span><span class="s">'d'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]))[</span><span class="mi">1</span><span class="p">:])</span>          
+           
+        
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">epoch</span><span class="p">):</span>
+
+            <span class="n">error_in</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">g_</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span> <span class="c1"># initialize 'G' matrix with all entries being zero 
+</span>                <span class="bp">self</span><span class="o">.</span><span class="n">g_</span><span class="p">[</span><span class="s">'G'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">'W'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)]</span>
+
+            <span class="k">for</span> <span class="n">X_n</span><span class="p">,</span> <span class="n">y_n</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">forward_propagation_</span><span class="p">(</span><span class="n">X_n</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">back_propagation_</span><span class="p">(</span><span class="n">X_n</span><span class="p">,</span> <span class="n">y_n</span><span class="p">)</span>
+                <span class="n">error_in</span> <span class="o">+=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_</span><span class="p">[</span><span class="s">'x'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">L</span><span class="p">)]</span> <span class="o">-</span> <span class="n">y_n</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+
+                <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">L</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="n">g_X_n</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_</span><span class="p">[</span><span class="s">'x'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_</span><span class="p">[</span><span class="s">'x'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_</span><span class="p">[</span><span class="s">'d'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_</span><span class="p">[</span><span class="s">'d'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="c1"># it uses a trick to reshape lists to perform a dot product
+</span>                    <span class="bp">self</span><span class="o">.</span><span class="n">g_</span><span class="p">[</span><span class="s">'G'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_</span><span class="p">[</span><span class="s">'G'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">l</span><span class="p">)]</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="n">g_X_n</span>
+
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span> <span class="c1"># update weights
+</span>                <span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">'W'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)]</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eta</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">g_</span><span class="p">[</span><span class="s">'G'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)]</span>
+            
+            <span class="k">if</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">1000</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span> <span class="k">print</span><span class="p">(</span><span class="s">"Epoch n. {:4d}: {:.8f}."</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">error_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            
+        <span class="k">return</span> <span class="n">error_in</span> <span class="c1"># return final 'error_in'
+</span>            
+        
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="n">prediction</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">X</span><span class="p">:</span>
+            <span class="n">prediction</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">forward_propagation_</span><span class="p">(</span><span class="n">item</span><span class="p">))</span>
+            
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>Vamos começar pelo método <code class="highlighter-rouge">__init__()</code>. Nesse caso, o parâmetro <code class="highlighter-rouge">dim</code> é uma lista com as dimensões em cada uma das <em>layers</em> da nossa rede neural $-$ de $0$ a $L$. <code class="highlighter-rouge">L</code> é, claramente, o número de camadas (lembre-se de que a contagem, consiredando a camada de entrada, começa do $0$). <code class="highlighter-rouge">eta</code> (ou $\eta$) é a taxa de aprendizagem; e, por fim, <code class="highlighter-rouge">epoch</code> é o número de iterações que vamos considerar para o nosso processo de otimização do termo $E_{in}$.</p>
+
+<p>O método <code class="highlighter-rouge">initialize_()</code> inicializa o vetor de pesos adequadamente $-$ aqui, é interessante a estratégia que escolhemos tomar para indexar cada uma das <em>layes</em> (a inspiração veio <a href="https://www.freecodecamp.org/news/building-a-neural-network-from-scratch/">desse</a> artigo). A função <code class="highlighter-rouge">theta()</code> é o nosso nó de transformação não-linear, definido por $\tanh(\cdot)$.</p>
+
+<p>O método <code class="highlighter-rouge">forward_propagation_()</code>, bem como <code class="highlighter-rouge">back_propagation_()</code> implementam <strong>diretamente</strong> o algoritmo apresentado na <a href="/redes-neurais/">parte 12</a> $-$ a primeira função calcula o resultado <script type="math/tex">h(\mathbf{x})</script> para cada par <script type="math/tex">(\mathbf{x}_n, y_n)</script>, enquanto que a segunda determina o vetor <script type="math/tex">\mathbf{\delta}^{(l)}</script> (utilizado para, através do cálculo de <script type="math/tex">\nabla E_{in}</script>, modificação do vetor de pesos).</p>
+
+<p>Agora, perceba que o método <code class="highlighter-rouge">fit()</code> foi implementada <strong>sem</strong> utilizar a técnica de <em>Stochastic Gradient Descent</em> (SGD). Ou seja, o vetor gradiente $\nabla E_{in}$ considera <strong>todos</strong> os pontos em $\mathcal{D}$ antes de cada atualização de $\mathbf{w}$. Isso foi feito intencialmente já que, logo abaixo, faremos a implementação desse mesmo método utilizando o SGD para conseguirmos estabelecer a diferença de tempo computacional requerida por cada uma dessas alternativas.</p>
+
+<p>Por fim, o método <code class="highlighter-rouge">predict()</code>, como já temos feito há algum tempo, determina $h(\mathbf{x})$ para cada nova observação. Dito isso, vamos utilizar a classe que acabamos de criar:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">%%</span><span class="n">time</span>
+
+<span class="n">my_nn</span> <span class="o">=</span> <span class="n">NeuralNetwork</span><span class="p">(</span><span class="n">dim</span> <span class="o">=</span> <span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">eta</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span> <span class="n">epoch</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">)</span>
+<span class="n">error_in</span> <span class="o">=</span> <span class="n">my_nn</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Epoch n. {:4d}: {:.8f}."</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">my_nn</span><span class="o">.</span><span class="n">epoch</span><span class="p">,</span> <span class="n">error_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Epoch n.    0: 1.01090254.
+Epoch n. 1000: 0.34815072.
+Epoch n. 2000: 0.34731439.
+Epoch n. 3000: 0.34721020.
+Epoch n. 4000: 0.34710094.
+Epoch n. 5000: 0.34697082.
+Epoch n. 6000: 0.34678815.
+Epoch n. 7000: 0.34647321.
+Epoch n. 8000: 0.34577426.
+Epoch n. 9000: 0.34355829.
+Epoch n. 10000: 0.32932046.
+CPU times: user 5min 29s, sys: 218 ms, total: 5min 30s
+Wall time: 5min 30s
+</code></pre></div></div>
+
+<p>Antes de qualquer outra coisa, percebe que utilizamos o comando <code class="highlighter-rouge">%%time</code>, que, no Jupyter Notebook, serve para medir o tempo que uma célula demora para ser executada. Nesse caso, note que, para ajustar um modelo de $3$ hidden layers com $16$ nós em cada uma delas, para um total de dez mil iterações, gastamos um tempo de 5 minutos e 30 segundos. Lembre-se de que ainda <strong>não</strong> estamos utilizando o <em>Stochastic Gradient Descent</em>. Uma outra observação importante vem do fato de que, por quase nove mil iterações, o termo $E_{in}$ praticamente não foi diminuído, nos levando a ter que estender a simulação por muito mais tempo (o problema dos mínimos locais, discutido na <a href="/redes-neurais/">parte 12</a> pode ter sido uma das razões desse fenômeno).</p>
+
+<p>Ajustado o modelo, podemos, utilizando mais uma vez a função <code class="highlighter-rouge">plot_decision_regions</code>, determinar as regiões de classificação para o nosso problema.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">plot_decision_regions</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">classifier</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">resolution</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span> <span class="n">plot_lim</span> <span class="o">=</span> <span class="mf">0.25</span><span class="p">):</span>
+    <span class="c1"># general settings
+</span>    <span class="n">markers</span> <span class="o">=</span> <span class="p">[</span><span class="s">"o"</span><span class="p">,</span> <span class="s">"s"</span><span class="p">,</span> <span class="s">"*"</span><span class="p">,</span> <span class="s">"x"</span><span class="p">,</span> <span class="s">"v"</span><span class="p">]</span>
+    <span class="n">colors</span>  <span class="o">=</span> <span class="p">(</span><span class="s">"red"</span><span class="p">,</span> <span class="s">"green"</span><span class="p">,</span> <span class="s">"blue"</span><span class="p">,</span> <span class="s">"gray"</span><span class="p">,</span> <span class="s">"cyan"</span><span class="p">)</span>
+    <span class="n">x1_min</span><span class="p">,</span> <span class="n">x1_max</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="nb">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">plot_lim</span><span class="p">,</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="nb">max</span><span class="p">()</span> <span class="o">+</span> <span class="n">plot_lim</span>
+    <span class="n">x2_min</span><span class="p">,</span> <span class="n">x2_max</span> <span class="o">=</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="nb">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">plot_lim</span><span class="p">,</span> <span class="n">X</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="nb">max</span><span class="p">()</span> <span class="o">+</span> <span class="n">plot_lim</span>
+    <span class="c1"># define a grid
+</span>    <span class="n">xx1</span><span class="p">,</span> <span class="n">xx2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">x1_min</span><span class="p">,</span> <span class="n">x1_max</span><span class="p">,</span> <span class="n">resolution</span><span class="p">),</span>
+                           <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">x2_min</span><span class="p">,</span> <span class="n">x2_max</span><span class="p">,</span> <span class="n">resolution</span><span class="p">))</span>
+    <span class="c1"># classify each grid point
+</span>    <span class="n">result</span> <span class="o">=</span> <span class="n">classifier</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">xx1</span><span class="o">.</span><span class="n">ravel</span><span class="p">(),</span> <span class="n">xx2</span><span class="o">.</span><span class="n">ravel</span><span class="p">()])</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">xx1</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="c1"># make a plot
+</span>    <span class="n">plt</span><span class="o">.</span><span class="n">contourf</span><span class="p">(</span><span class="n">xx1</span><span class="p">,</span> <span class="n">xx2</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">colors</span> <span class="o">=</span> <span class="n">colors</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">))],</span> <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">y</span><span class="p">)):</span> 
+        <span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">value</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">y</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">y</span> <span class="o">==</span> <span class="n">value</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> 
+                    <span class="n">color</span> <span class="o">=</span> <span class="n">colors</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+                    <span class="n">marker</span> <span class="o">=</span> <span class="n">markers</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+                    <span class="n">label</span> <span class="o">=</span> <span class="n">feature_names</span><span class="p">[</span><span class="n">index</span><span class="p">],</span>
+                    <span class="n">edgecolor</span> <span class="o">=</span> <span class="s">'black'</span><span class="p">)</span>
+</code></pre></div></div>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span><span class="s">'Classe A'</span><span class="p">,</span> <span class="s">'Classe B'</span><span class="p">]</span>
+<span class="n">plot_decision_regions</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">my_nn</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">plot_lim</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">"Fitted Model with Implementation of Neural Network"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">"$x_1$"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">"$x_2$"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/assets/images/implementacao-redes-neurais_files/implementacao-redes-neurais_16_0.png" alt="png" /></p>
+
+<p>Do gráfico acima, perceba que as transformações não-lineares aprendidas pela rede <strong>não</strong> foram suficientes para captar corretamente o comportamento dos dados. Mais uma vez, isso se deve ao fato de que o algoritmo <strong>não</strong> foi capaz de minimar, a níveis suficientemente bons, o termo $E_{in}$ $-$ o que é, obviamente, um grande problema.</p>
+
+<p>Para contornar esse obstáculo, vamos sobrescrever o método <code class="highlighter-rouge">fit()</code> utilizando, como novidade, a técnica SGD. Para isso, basta utilizar o conceito de “herança” e criar uma classe <code class="highlighter-rouge">NeuralNetworkSGD</code> que herda os atributos e métodos de <code class="highlighter-rouge">NeuralNetwork</code>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">class</span> <span class="nc">NeuralNetworkSGD</span><span class="p">(</span><span class="n">NeuralNetwork</span><span class="p">):</span>
+    <span class="s">"""
+    Neural Network Model using Stochastic Gradient Descent (S.G.D.)
+    """</span>        
+    <span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initialize_</span><span class="p">()</span>
+        
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">epoch</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+        
+        
+            <span class="n">rand_number</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        
+            <span class="n">X_n</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">rand_number</span><span class="p">]</span>
+            <span class="n">y_n</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">rand_number</span><span class="p">]</span> 
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">forward_propagation_</span><span class="p">(</span><span class="n">X_n</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">back_propagation_</span><span class="p">(</span><span class="n">X_n</span><span class="p">,</span> <span class="n">y_n</span><span class="p">)</span>
+            
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span> <span class="c1"># update weights
+</span>                <span class="bp">self</span><span class="o">.</span><span class="n">w_</span><span class="p">[</span><span class="s">'W'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)]</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eta</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_</span><span class="p">[</span><span class="s">'x'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">x_</span><span class="p">[</span><span class="s">'x'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_</span><span class="p">[</span><span class="s">'d'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)]</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">d_</span><span class="p">[</span><span class="s">'d'</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+              
+        <span class="n">error_in</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="k">for</span> <span class="n">X_n</span><span class="p">,</span> <span class="n">y_n</span> <span class="ow">in</span> <span class="nb">zip</span> <span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>            
+            <span class="n">error_in</span> <span class="o">+=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">forward_propagation_</span><span class="p">(</span><span class="n">X_n</span><span class="p">)</span> <span class="o">-</span> <span class="n">y_n</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">error_in</span>
+</code></pre></div></div>
+
+<p>Agora, como dito antes, somos capazes de ajustar o vetor de pesos $\mathbf{w}$ para cada rodada de iteração que considera <strong>somente</strong> um par $(\mathbf{x}_n, y_n)$, uniformemente escolhido em $\mathcal{D}$. Ajustando o modelo:</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="o">%%</span><span class="n">time</span>
+
+<span class="n">my_nn_mod</span> <span class="o">=</span> <span class="n">NeuralNetworkSGD</span><span class="p">(</span><span class="n">dim</span> <span class="o">=</span> <span class="p">[</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">256</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">eta</span> <span class="o">=</span> <span class="mf">1e-2</span><span class="p">,</span> <span class="n">epoch</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">)</span>
+<span class="n">error_in</span>  <span class="o">=</span> <span class="n">my_nn_mod</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
+<span class="k">print</span><span class="p">(</span><span class="s">"Epoch n. {:4d}: {:.8f}."</span><span class="o">.</span><span class="nb">format</span><span class="p">(</span><span class="n">my_nn_mod</span><span class="o">.</span><span class="n">epoch</span><span class="p">,</span> <span class="n">error_in</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+</code></pre></div></div>
+
+<div class="highlighter-rouge"><div class="highlight"><pre class="highlight"><code>Epoch n. 10000: 0.01763535.
+CPU times: user 50.7 s, sys: 30.5 s, total: 1min 21s
+Wall time: 21.8 s
+</code></pre></div></div>
+
+<p>Note que, primeiro, mesmo considerando uma rede razoavelmente maior $-$ $3$ hidden layers, só que dessa vez com $256$ nós em cada uma delas (para as mesmas dez mil iterações) $-$ o tempo de execução foi bem menor: 1 minuto e 21 segundos. Além disso o termo $E_{in}$ foi minimizado até $\approx 0.0178$. Agora, vamos plotar o gráfico das regiões de decisão para essa segunda simulação.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="n">feature_names</span> <span class="o">=</span> <span class="p">[</span><span class="s">'Classe A'</span><span class="p">,</span> <span class="s">'Classe B'</span><span class="p">]</span>
+<span class="n">plot_decision_regions</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">my_nn_mod</span><span class="p">,</span> <span class="n">feature_names</span><span class="p">,</span> <span class="n">plot_lim</span> <span class="o">=</span> <span class="mf">0.15</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">"Fitted Model with Implementation of N.N. using S.G.D."</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">"$x_1$"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">"$x_2$"</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span> <span class="o">=</span> <span class="mi">2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</code></pre></div></div>
+
+<p><img src="/assets/images/implementacao-redes-neurais_files/implementacao-redes-neurais_23_0.png" alt="png" /></p>
+
+<p>Note que que as regiões de decisão desenhadas representam muito melhor os dados do que o primeiro caso. O que nos leva a pensar que, de fato, a técnica de <em>Stochastic Gradient Descent</em> gera bons resultados. Há um problema, entretanto; como conversamos na <a href="/vies-variancia-tradeoff/">parte 10</a>, modelos mais complexos (ou seja, modelos que se adaptam melhor ao conjunto de dados fornecido) podem sofrer grande variação à medida que variamos $\mathcal{D}$ $-$ nesse caso, podemos sofrer de <em>overfitting</em>, situação na qual o modelo perde seu poder de generalização para dados fora de $\mathcal{D}$.</p>
+
+<h2 id="conclusão">Conclusão</h2>
+
+<p>Seguindo à risca a teoria que desenvolvemos na <a href="/redes-neurais/">parte 12</a>, foi relativamente fácil implementarmos um rede neural que aceita parâmetros bastante razoáveis sobre sua arquitetura. Vimos que, a depender do conjunto de dados com o qual estamos trabalhando, as transformações não-lineares aprendidas pela rede podem não ser boas o suficiente para descrevermos $\mathcal{D}$ $-$ isso acontece, dentre outros motivos, pelo fato de que minimizar $E_{in}$ pode ser complicado à medida que encontramos mínimios locais que não são globais. Porém, como também pudemos testar, esse problema pode ser mitigado empregando a técnica de <em>Stochastic Gradient Descent</em> $-$ que, no nosso caso, gerou bons resultados.</p>
+
+<p>Qualquer dúvida, sugestão ou <em>feedback</em>, por favor, deixe um comentário abaixo.</p>
+
+<blockquote>
+  <p>Essa postagem faz parte de uma <a href="/categorias/#machine-learning-learning-from-data">série</a> de textos que tem o objetivo de estudar, principalmente, o curso “<a href="http://www.work.caltech.edu/telecourse.html">Learning from Data</a>”, ministrado pelo Professor Yaser Abu-Mostafa. Outros materiais utilizados serão sempre referenciados.</p>
+</blockquote>
+
+        
+      </section>
+
+      <footer class="page__meta">
+        
+        
+
+
+        
+          <p class="page__date"><strong><i class="fas fa-fw fa-calendar-alt" aria-hidden="true"></i> Atualizado em:</strong> <time datetime="2020-01-29T00:00:00-03:00">January 29, 2020</time></p>
+        
+      </footer>
+
+      
+
+      
+  <nav class="pagination">
+    
+      <a href="/redes-neurais/" class="pagination--pager" title="[Parte 12] Redes Neurais
+">Anterior</a>
+    
+    
+      <a href="#" class="pagination--pager disabled">Próxima</a>
+    
+  </nav>
+
+    </div>
+
+    
+      <div class="page__comments">
+  
+  
+      <h4 class="page__comments-title">Deixe um comentário</h4>
+      <section id="disqus_thread"></section>
+    
+</div>
+
+    
+  </article>
+
+  
+  
+    <div class="page__related">
+      <h4 class="page__related-title">Talvez você também goste</h4>
+      <div class="grid__wrapper">
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/redes-neurais/" rel="permalink">[Parte 12] Redes Neurais
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  14 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Ao longo desse post vamos, como temos feito para todos os modelos que discutimos até agora nessa série de textos, estudar o que são, do ponto de vista mais teórico, as redes neurais. A ideia é que, na próxima postagem, a gente consiga implementar em Python o que vamos estudar a partir desse momento.
+</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/modelo-de-regressao-logistica/" rel="permalink">[Parte 11] Modelo de Regressão Logística &amp; Implementação em Python
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  15 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Voltando a falar de modelos lineares, como os de classificação $-$ explorados nas partes 02 e 04 $-$ ou de regressão linear, a exemplo do que vimos na parte 05, iremos discutir nesse post o que é e como funciona a regressão logística. Veremos que esse novo modelo herda características das duas classes de algoritmos ...</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/vies-variancia-tradeoff/" rel="permalink">[Parte 10] Trade-off entre Viés-Variância
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  7 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Continuando com a discussão, introduzida na parte 09 dessa série de textos, de que deve existir um “meio termo” sobre o tamanho de $\mathcal{H}$ $-$ lembre-se: se $\mathcal{H}$ é muito grande, conseguimos diminuir o termo $E_{in}$; porém, somos penalizados na generalização do modelo para dados fora de $\mathcal{D}$....</p>
+  </article>
+</div>
+
+        
+          
+
+
+
+<div class="grid__item">
+  <article class="archive__item" itemscope itemtype="https://schema.org/CreativeWork">
+    
+    <h2 class="archive__item-title" itemprop="headline">
+      
+        <a href="/dimensao-vc/" rel="permalink">[Parte 09] Dimensão de Vapnik-Chervonenkis
+</a>
+      
+    </h2>
+    
+      <p class="page__meta"><i class="far fa-clock" aria-hidden="true"></i> 
+
+
+
+
+  9 minuto(s) de leitura
+
+</p>
+    
+    <p class="archive__item-excerpt" itemprop="description">Continuando a discussão que começamos na última parte da nossa série de textos, vamos estudar mais propriedades associadas ao que demos o nome de “Teoria da Generalização”; ou, em outras palavras, ao estudo de como os nossos modelos podem ser generalizados para conjuntos de dados fora de $\mathcal{D}$.
+</p>
+  </article>
+</div>
+
+        
+      </div>
+    </div>
+  
+  
+</div>
+
+    </div>
+
+    
+
+    <div id="footer" class="page__footer">
+      <footer>
+        <!-- start custom footer snippets -->
+
+<!-- end custom footer snippets -->
+        <div class="page__footer-follow">
+  <ul class="social-icons">
+    
+      <li><strong>Informações:</strong></li>
+    
+
+    
+      
+        
+          <li><a href="https://github.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+        
+      
+        
+          <li><a href="https://twitter.com/avramaral" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter" aria-hidden="true"></i> Twitter</a></li>
+        
+      
+        
+          <li><a href="https://www.linkedin.com/in/andre-victor-ribeiro-amaral/" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-linkedin-in" aria-hidden="true"></i> LinkedIn</a></li>
+        
+      
+        
+          <li><a href="https://www.youtube.com/channel/UC5RVscKF68DWYixtJPrBccQ" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-youtube" aria-hidden="true"></i> YouTube</a></li>
+        
+      
+    
+
+    
+  </ul>
+</div>
+
+<div class="page__footer-copyright">&copy; 2020 André. Desenvolvido com <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+
+      </footer>
+    </div>
+
+    
+  <script src="/assets/js/main.min.js"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
+
+
+
+
+
+
+
+    
+  <script>
+    var disqus_config = function () {
+      this.page.url = "http://localhost:4000/implementacao-redes-neurais/";  // Replace PAGE_URL with your page's canonical URL variable
+      this.page.identifier = "/implementacao-redes-neurais"; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    (function() { // DON'T EDIT BELOW THIS LINE
+      var d = document, s = d.createElement('script');
+      s.src = 'https://blog-do-andre.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', +new Date());
+      (d.head || d.body).appendChild(s);
+    })();
+  </script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+
+
+  
+
+
+
+
+
+    <script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script>
+
+  </body>
+</html>
