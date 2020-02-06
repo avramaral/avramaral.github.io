@@ -1,0 +1,2 @@
+I"j<p>Formalizando alguns conceitos sobre os quais já falamos ao longo <a href="/categorias/#machine-learning-learning-from-data">dessa série de textos</a>, essa postagem será dedicada à discussão de: 1) Como quantificar o quão bem a hipótese final $g \in \mathcal{H}$ se aproxima da função alvo $f$? 2) Como lidar com o “ruído” associado à $f$?</p>
+:ET

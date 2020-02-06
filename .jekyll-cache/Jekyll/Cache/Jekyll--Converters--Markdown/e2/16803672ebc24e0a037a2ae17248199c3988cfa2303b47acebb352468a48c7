@@ -1,0 +1,2 @@
+I"�<p>Na <a href="/memorizar-nao-e-aprender/">parte 03</a> <a href="/categorias/#machine-learning-learning-from-data">dessa série de textos</a>, discutimos se é possível que nossos algoritmos, de fato, aprendam; ou seja, se conseguimos determinar uma função $g \in \mathcal{H}$ que aproxima bem $f$ para pontos $\mathbf{x} \not\in \mathcal{D}$. Esse assunto ainda não foi esgotado, mas por hora vamos nos concentrar em estudar mais alguns algoritmos $-$ em especial, alguns modelos lineares.</p>
+:ET
