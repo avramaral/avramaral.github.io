@@ -1,2 +1,0 @@
-I"�<p>O que nós fizemos até agora foi, dado um conjunto $\mathcal{D}$, treinar um modelo que “explicasse” (no caso do Perceptron, “classificasse”) os dados $(\mathbf{x}_1, y_1), \cdots, (\mathbf{x}_N, y_N)$. Porém, isso significa, de fato, aprender? Isto é, a função $g \in \mathcal{H}$ escolhida pelo algoritmo aproxima a função alvo $f$ no sentido de ter bom desempenho em explicar $\mathbf{x} \not\in \mathcal{D}$?</p>
-:ET

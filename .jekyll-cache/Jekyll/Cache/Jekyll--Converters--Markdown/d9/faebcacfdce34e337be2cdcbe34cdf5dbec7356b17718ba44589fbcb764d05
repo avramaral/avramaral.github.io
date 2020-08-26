@@ -1,2 +1,0 @@
-I"�<p>Como mencionado na <a href="/o-que-e-aprendizado/">parte 01</a> <a href="/categorias/#machine-learning-learning-from-data">dessa série de textos</a>, essa postagem será dedicada à implementação do <em>Perceptron Learning Algorithm</em> (PLA) em Python, utilizando, para isso, a biblioteca Numpy. Discutiremos um exemplo e, ao final, vamos ver como utilizar a implementação desse mesmo algoritmo pela biblioteca Sklearn.</p>
-:ET
